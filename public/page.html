@@ -234,6 +234,8 @@
       <div class="menu-icon" id="menu-icon">☰</div>
       <div class="dropdown-menu" id="dropdown-menu">
         <div class="dropdown-item" id="send-item">📤 Pesan Baru</div>
+        <div class="dropdown-item" id="send-item" onclick="window.location.href='send.html'">📧 Blash</div>
+        <div class="dropdown-item" id="send-item" onclick="window.location.href='config.html'">🔄 Config</div>
         <div class="dropdown-item" id="logout-item">🔒 Logout</div>
       </div>
     </div>
@@ -281,6 +283,16 @@
     </div>
   </div>
 
+  <script>
+    // sessionStorage.setItem("fromIndex", "yes");
+    if (sessionStorage.getItem("fromIndex") !== "yes") {
+      alert("❌ Akses tidak sah. Silakan login lewat QR dulu.");
+      window.location.href = "index.html";
+    } else {
+      // Tandai bahwa user boleh masuk ke config.html
+      sessionStorage.setItem("fromPage", "yes");
+    }
+  </script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.0/build/qrcode.min.js"></script>
   <script>
@@ -327,13 +339,14 @@
     });
 
     confirmLogoutBtn.addEventListener("click", () => {
-  console.log("✅ Tombol logout diklik");
+    console.log("✅ Tombol logout diklik");
+      sessionStorage.clear(); // atau set `fromIndex` = null
       socket.emit("logout");
       statusText.textContent = "🔄 Menunggu QR code...";
       logoutModal.style.display = "none";
       setTimeout(() => {
         window.location.href = "index.html";
-      }, 500);
+      }, 900);
     });
 
     cancelLogoutBtn.addEventListener("click", () => {

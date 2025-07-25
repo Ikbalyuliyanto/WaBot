@@ -78,4 +78,53 @@ function setClient(whatsappClient) {
     client = whatsappClient;
 }
 
+const configPath = path.join(__dirname, '../config/config.json');
+
+// GET: Ambil konfigurasi
+router.get('/config', (req, res) => {
+    try {
+        if (!fs.existsSync(configPath)) return res.json({});
+        const data = fs.readFileSync(configPath, 'utf-8');
+        res.json(JSON.parse(data));
+    } catch (err) {
+        console.error('❌ Gagal membaca config:', err);
+        res.status(500).json({ message: 'Gagal membaca konfigurasi' });
+    }
+});
+
+// ✅ POST: Simpan konfigurasi (dengan pengecekan folder)
+router.post('/config', express.json(), (req, res) => {
+    try {
+        const configDir = path.dirname(configPath);
+        if (!fs.existsSync(configDir)) {
+            fs.mkdirSync(configDir, { recursive: true });
+        }
+
+        fs.writeFileSync(configPath, JSON.stringify(req.body, null, 2));
+        res.json({ message: '✅ Konfigurasi berhasil disimpan' });
+    } catch (err) {
+        console.error('❌ Gagal menyimpan config:', err);
+        res.status(500).json({ message: 'Gagal menyimpan konfigurasi' });
+    }
+});
+router.post('/config', express.json(), (req, res) => {
+    try {
+        console.log('📥 Data diterima:', req.body);
+
+        const configDir = path.dirname(configPath);
+        if (!fs.existsSync(configDir)) {
+            console.log('📁 Folder belum ada, membuat folder...');
+            fs.mkdirSync(configDir, { recursive: true });
+        }
+
+        fs.writeFileSync(configPath, JSON.stringify(req.body, null, 2));
+        console.log('✅ Konfigurasi berhasil disimpan ke:', configPath);
+
+        res.json({ message: '✅ Konfigurasi berhasil disimpan' });
+    } catch (err) {
+        console.error('❌ Gagal menyimpan config:', err);
+        res.status(500).json({ message: 'Gagal menyimpan konfigurasi', error: err.message });
+    }
+});
+
 module.exports = { router, setClient };

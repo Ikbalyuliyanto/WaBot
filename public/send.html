@@ -351,12 +351,59 @@
     @keyframes spin {
       0% { transform: translate(-50%, -50%) rotate(0deg); }
       100% { transform: translate(-50%, -50%) rotate(360deg); }
-    }
+    }.overlay-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  display: none;
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: white;
+  font-size: 1.2rem;
+}
+
+.loader-content {
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.spinner {
+  border: 4px solid rgba(255,255,255,0.3);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 15px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
   </style>
 </head>
 <body>
   <div class="container">
     <div id="status"></div>
+    <div id="loader" class="overlay-loader">
+      <div class="loader-content">
+        <div class="spinner"></div>
+        <p>⏳ Mengirim, mohon tunggu...</p>
+      </div>
+    </div>
     <!-- WhatsApp Section -->
     <div class="form-section whatsapp-section row">
       <!-- Kirim Teks -->
@@ -370,7 +417,7 @@
             <label>Pesan:</label>
               <input type="text" id="textMessage" placeholder="Masukkan Pesan" required>
           </div>
-          <button type="submit">Kirim Teks</button>
+          <button type="submit">Kirim Pesan WhatsApp</button>
         </form>
       </div>
 
@@ -388,14 +435,13 @@
               </label>
             </div>
           </div>
-          <button type="submit">Kirim File</button>
+          <button type="submit">Kirim File WhatsApp</button>
         </form>
       </div>
     </div>
 
     <!-- Email Section -->
     <div class="form-section email-section">
-      <h3>📧 Kirim File ke Email</h3>
       <form id="formEmail" enctype="multipart/form-data">
         <div class="row">
           <div class="column">
@@ -431,51 +477,97 @@
   </div>
   <script>
     const API_KEY = 'kynd_X2n91cA38Dz73k5Mf81aZLq8Ld_f9083da98dfd092a8c5';
+    //loading
+    function showLoader() {
+      document.getElementById('loader').style.display = 'block';
+      document.getElementById('status').innerText = '';
+    }
+
+    function hideLoader() {
+      document.getElementById('loader').style.display = 'none';
+    }
 
     // Kirim Teks
     document.getElementById('formTeks').addEventListener('submit', async (e) => {
       e.preventDefault();
+      showLoader();
+      
       const number = document.getElementById('textNumber').value;
       const message = document.getElementById('textMessage').value;
+      try {
+          const res = await fetch('/send-message', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': API_KEY
+            },
+            body: JSON.stringify({ number, message })
+          });
 
-      const res = await fetch('/send-message', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': API_KEY
-        },
-        body: JSON.stringify({ number, message })
-      });
+          const data = await res.json();
+          document.getElementById('status').innerText = data.message;
+        } catch (err) {
+          document.getElementById('status').innerText = '❌ Gagal mengirim pesan.';
+        } finally {
+          hideLoader();
+        }
+      // const res = await fetch('/send-message', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     'x-api-key': API_KEY
+      //   },
+      //   body: JSON.stringify({ number, message })
+      // });
 
-      const data = await res.json();
-      document.getElementById('status').innerText = data.message;
+      // const data = await res.json();
+      // document.getElementById('status').innerText = data.message;
     });
 
     // Kirim File WhatsApp
     document.getElementById('formFile').addEventListener('submit', async (e) => {
       e.preventDefault();
+      showLoader();
+      
       const number = document.getElementById('textNumber').value;
       const file = document.getElementById('fileInput').files[0];
-
+      
       const formData = new FormData();
       formData.append('number', number);
       formData.append('pdf', file);
 
-      const res = await fetch('/upload-and-send', {
-        method: 'POST',
-        headers: {
-          'x-api-key': API_KEY
-        },
-        body: formData
-      });
+      try {
+        const res = await fetch('/upload-and-send', {
+          method: 'POST',
+          headers: { 'x-api-key': API_KEY },
+          body: formData
+        });
 
-      const data = await res.json();
-      document.getElementById('status').innerText = data.message;
+        const data = await res.json();
+        document.getElementById('status').innerText = data.message;
+      } catch (err) {
+        document.getElementById('status').innerText = '❌ Gagal mengirim file.';
+      } finally {
+        hideLoader();
+      }
+
+      // const res = await fetch('/upload-and-send', {
+      //   method: 'POST',
+      //   headers: {
+      //     'x-api-key': API_KEY
+      //   },
+      //   body: formData
+      // });
+
+      // const data = await res.json();
+      // document.getElementById('status').innerText = data.message;
     });
 
     // Kirim Email
     document.getElementById('formEmail').addEventListener('submit', async (e) => {
       e.preventDefault();
+      showLoader();
+      
       const email = document.getElementById('email').value;
       const subject = document.getElementById('subject').value;
       const text = document.getElementById('emailText').value;
@@ -486,17 +578,31 @@
       formData.append('subject', subject);
       formData.append('text', text);
       formData.append('pdf', file);
+      
+      try {
+        const res = await fetch('/upload-and-send-mail', {
+          method: 'POST',
+          headers: { 'x-api-key': API_KEY },
+          body: formData
+        });
 
-      const res = await fetch('/upload-and-send-mail', {
-        method: 'POST',
-        headers: {
-          'x-api-key': API_KEY
-        },
-        body: formData
-      });
+        const data = await res.json();
+        document.getElementById('status').innerText = data.message;
+      } catch (err) {
+        document.getElementById('status').innerText = '❌ Gagal kirim email.';
+      } finally {
+        hideLoader();
+      }
+      // const res = await fetch('/upload-and-send-mail', {
+      //   method: 'POST',
+      //   headers: {
+      //     'x-api-key': API_KEY
+      //   },
+      //   body: formData
+      // });
 
-      const data = await res.json();
-      document.getElementById('status').innerText = data.message;
+      // const data = await res.json();
+      // document.getElementById('status').innerText = data.message;
     });
   </script>
 </body>
