@@ -3,357 +3,858 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>WhatsAppBot</title>
+  <title>WhatsApp Bot</title>
   <style>
     * {
-      margin: 0; padding: 0; box-sizing: border-box;
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box;
     }
+    
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background-color: #111b21;
-      color: #e9edef;
+      font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+      background: linear-gradient(180deg, #00bfa5 0%, #009688 100%);
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    .app-container {
       display: flex;
       height: 100vh;
+      background: #f0f2f5;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
+    
+    /* Sidebar */
     .sidebar {
-      width: 350px;
-      background-color: #202c33;
+      width: 400px;
+      background: #ffffff;
       display: flex;
       flex-direction: column;
-      border-right: 1px solid #2a3942;
-      position: relative;
+      border-right: 1px solid #e9edef;
     }
+    
     .sidebar-header {
-      background-color: #2a3942;
-      border-bottom: 1px solid #3b4a54;
-      padding: 16px;
+      background: #f0f2f5;
+      padding: 10px 16px;
       display: flex;
       align-items: center;
-      position: relative;
+      justify-content: space-between;
+      height: 59px;
+      border-bottom: 1px solid #e9edef;
     }
-    .sidebar-title {
-      font-size: 18px;
-      font-weight: 600;
+    
+    .profile-section {
+      display: flex;
+      align-items: center;
+      gap: 15px;
     }
-    .menu-icon {
-      font-size: 20px;
+    
+    .profile-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 500;
+      font-size: 16px;
+    }
+    
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .action-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: none;
+      border: none;
       cursor: pointer;
-      margin-left: auto;
-      color: #e9edef;
-      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #54656f;
+      font-size: 20px;
+      transition: background-color 0.2s;
     }
+    
+    .action-btn:hover {
+      background: #f5f6f6;
+    }
+    
     .dropdown-menu {
       position: absolute;
-      top: 45px;
-      left: 340px;
-      background-color: #2a3942;
-      border: 1px solid #3b4a54;
+      top: 55px;
+      background: white;
       border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
       display: none;
-      flex-direction: column;
-      min-width: 140px;
       z-index: 100;
+      min-width: 200px;
+      overflow: hidden;
     }
+    
     .dropdown-item {
-      padding: 10px 16px;
-      color: #e9edef;
+      padding: 12px 24px;
       cursor: pointer;
-      border-bottom: 1px solid #3b4a54;
+      color: #41525d;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    .dropdown-item:last-child {
-      border-bottom: none;
-    }
+    
     .dropdown-item:hover {
-      background-color: #3b4a54;
+      background: #f5f6f6;
     }
-    .search-bar {
-      background-color: #2a3942;
-      border-bottom: 1px solid #3b4a54;
-      padding: 16px;
+    
+    /* Search Bar */
+    .search-container {
+      padding: 12px;
+      background: #f0f2f5;
+      border-bottom: 1px solid #e9edef;
     }
+    
+    .search-wrapper {
+      position: relative;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
     .search-input {
       width: 100%;
-      padding: 8px 12px;
-      border-radius: 8px;
+      padding: 10px 16px 10px 50px;
       border: none;
-      background-color: #3b4a54;
-      color: #e9edef;
+      outline: none;
+      font-size: 15px;
+      background: #f0f2f5;
     }
-    .search-input::placeholder {
+    
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
       color: #8696a0;
+      font-size: 16px;
     }
+    
+    /* Chat List */
     .chat-list {
       flex: 1;
       overflow-y: auto;
+      background: white;
     }
+    
     .chat-item {
       display: flex;
       align-items: center;
       padding: 12px 16px;
-      border-bottom: 1px solid #2a3942;
       cursor: pointer;
+      border-bottom: 1px solid #f0f2f5;
+      transition: background-color 0.1s;
     }
+    
     .chat-item:hover {
-      background-color: #2a3942;
+      background: #f5f6f6;
     }
+    
+    .chat-item.active {
+      background: #e7f3ff;
+    }
+    
     .chat-avatar {
-      width: 40px;
-      height: 40px;
-      background-color: #00a884;
+      width: 49px;
+      height: 49px;
       border-radius: 50%;
+      background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       color: white;
-      font-weight: bold;
-    }
-    .chat-content {
-      margin-left: 12px;
-      flex: 1;
-    }
-    .chat-name {
       font-weight: 500;
-      color: #e9edef;
+      font-size: 20px;
+      margin-right: 15px;
+      flex-shrink: 0;
     }
-    .chat-message {
-      color: #8696a0;
-      font-size: 14px;
+    
+    .chat-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .chat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3px;
+    }
+    
+    .chat-name {
+      font-size: 17px;
+      font-weight: 400;
+      color: #111b21;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
+    
+    .chat-time {
+      font-size: 12px;
+      color: #667781;
+      white-space: nowrap;
+    }
+    
+    .chat-message {
+      font-size: 14px;
+      color: #667781;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .message-status {
+      color: #53bdeb;
+      font-size: 16px;
+    }
+    
+    /* Main Content */
     .main-content {
       flex: 1;
-      background-color: #0b141a;
+      background: #f0f2f5;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 40px;
+      position: relative;
     }
-    .bot-title {
+    
+    .chat-header-main {
+      background: #f0f2f5;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #e9edef;
+      height: 59px;
+    }
+    
+    .main-chat-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 500;
+      margin-right: 15px;
+    }
+    
+    .main-chat-info {
+      flex: 1;
+    }
+    
+    .main-chat-name {
+      font-size: 16px;
+      font-weight: 400;
+      color: #111b21;
+    }
+    
+    .main-chat-status {
+      font-size: 13px;
+      color: #667781;
+    }
+    
+    /* Chat Messages Area */
+    .chat-messages {
+      flex: 1;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path fill="rgba(0,0,0,0.04)" d="M20 0C8.954 0 0 8.954 0 20s8.954 20 20 20 20-8.954 20-20S31.046 0 20 0zm0 35c-8.284 0-15-6.716-15-15S11.716 5 20 5s15 6.716 15 15-6.716 15-15 15z"/></svg>');
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .message {
+      max-width: 70%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.4;
+      position: relative;
+      word-wrap: break-word;
+    }
+    
+    .message.outgoing {
+      background: #d9fdd3;
+      align-self: flex-end;
+      margin-left: auto;
+    }
+    
+    .message.incoming {
+      background: white;
+      align-self: flex-start;
+      margin-right: auto;
+    }
+    
+    .message-time {
+      font-size: 11px;
+      color: #667781;
+      margin-top: 4px;
+      text-align: right;
+    }
+    
+    /* Message Input */
+    .message-input-container {
+      background: #f0f2f5;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .input-wrapper {
+      flex: 1;
+      background: white;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      padding: 9px 16px;
+    }
+    
+    .message-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 15px;
+      background: transparent;
+      color: #111b21;
+    }
+    
+    .message-input::placeholder {
+      color: #8696a0;
+    }
+    
+    .send-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #00a884;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+      transition: background-color 0.2s;
+    }
+    
+    .send-btn:hover {
+      background: #017c5e;
+    }
+    
+    /* Welcome Screen */
+    .welcome-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #41525d;
+      text-align: center;
+    }
+    
+    .welcome-logo {
+      width: 300px;
+      height: 300px;
+      margin-bottom: 32px;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23bbc5cb"><path d="M12 2C6.477 2 2 6.477 2 12c0 1.592.37 3.116 1.03 4.453L1.9 20.1a.5.5 0 00.64.64l3.647-1.13A9.956 9.956 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-1.337 0-2.61-.32-3.726-.89l-.26-.15-2.355.73.73-2.355-.15-.26A7.956 7.956 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z"/></svg>') center/contain no-repeat;
+      opacity: 0.2;
+    }
+    
+    .welcome-title {
       font-size: 32px;
       font-weight: 300;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
+      color: #41525d;
     }
-    .login-text {
-      color: #8696a0;
-      font-size: 16px;
-      margin-bottom: 30px;
-      text-align: center;
+    
+    .welcome-text {
+      font-size: 14px;
+      line-height: 1.5;
       max-width: 400px;
+      color: #667781;
     }
-    .qr-code {
-      width: 200px;
-      height: 200px;
-      margin-bottom: 20px;
-    }
-    .status-text {
+    
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 20px;
+      padding: 12px 24px;
+      background: rgba(0, 168, 132, 0.1);
+      border-radius: 8px;
       font-size: 14px;
       color: #00a884;
-      margin-top: 10px;
     }
-    .logout-link {
-      color: #00a884;
-      font-size: 14px;
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-    .logout-link:hover {
-      text-decoration: underline;
-      color: #1ed99c;
-    }
-
-    /* Modal background */
+    
+    /* Modal */
     .modal {
       display: none;
       position: fixed;
-      z-index: 999;
-      left: 0; top: 0;
-      width: 100vw; height: 100vh;
-      background-color: rgba(0, 0, 0, 0.5); /* semi transparan */
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.3);
       justify-content: center;
       align-items: center;
-      font-family: sans-serif;
     }
-
-    /* Modal box */
+    
     .modal-content {
-      background: #25c7a1;
-      padding: 24px 32px;
+      background: white;
+      padding: 24px;
       border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
       text-align: center;
-      max-width: 90%;
-      width: 350px;
+      max-width: 400px;
+      width: 90%;
     }
-
-    /* Tombol */
+    
+    .modal-title {
+      font-size: 18px;
+      font-weight: 500;
+      color: #111b21;
+      margin-bottom: 16px;
+    }
+    
     .modal-buttons {
-      margin-top: 16px;
       display: flex;
       justify-content: center;
       gap: 12px;
+      margin-top: 20px;
     }
-
+    
     .btn {
-      padding: 10px 20px;
-      font-weight: bold;
+      padding: 10px 24px;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       cursor: pointer;
       font-size: 14px;
-      transition: background-color 0.2s;
+      font-weight: 500;
+      transition: all 0.2s;
     }
-
-    .btn-confirm {
-      background-color: #d9534f;
+    
+    .btn-primary {
+      background: #00a884;
       color: white;
     }
-
-    .btn-confirm:hover {
-      background-color: #c9302c;
+    
+    .btn-primary:hover {
+      background: #017c5e;
+    }
+    
+    .btn-secondary {
+      background: #f0f2f5;
+      color: #54656f;
+    }
+    
+    .btn-secondary:hover {
+      background: #e4e6ea;
+    }
+    .send-btn[for="message-file"] {
+      cursor: pointer;
+      font-size: 18px;
+      padding: 12px;
     }
 
-    .btn-cancel {
-      background-color: #f0f0f0;
-      color: #333;
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
     }
-
-    .btn-cancel:hover {
-      background-color: #e0e0e0;
+    
+    ::-webkit-scrollbar-track {
+      background: transparent;
     }
-
-
+    
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        position: absolute;
+        z-index: 10;
+        left: -100%;
+        transition: left 0.3s;
+      }
+      
+      .sidebar.active {
+        left: 0;
+      }
+      
+      .main-content {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-title">WhatsAppBot</div>
-      <div class="menu-icon" id="menu-icon">☰</div>
-      <div class="dropdown-menu" id="dropdown-menu">
-        <div class="dropdown-item" id="send-item">📤 Pesan Baru</div>
-        <div class="dropdown-item" id="send-item" onclick="window.location.href='send.html'">📧 Blash</div>
-        <div class="dropdown-item" id="send-item" onclick="window.location.href='config.html'">🔄 Config</div>
-        <div class="dropdown-item" id="logout-item">🔒 Logout</div>
-      </div>
-    </div>
-    <div class="search-bar">
-      <input type="text" class="search-input" placeholder="Cari atau mulai chat baru">
-    </div>
-    <div class="chat-list">
-      <div class="chat-item">
-        <div class="chat-avatar">C</div>
-        <div class="chat-content">
-          <div class="chat-name">Cynthia</div>
-          <div class="chat-message">isinya!</div>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="profile-section">
+          <div class="profile-avatar">WB</div>
+        </div>
+        <div class="header-actions">
+          <button class="action-btn" id="new-chat-btn">💬</button>
+          <button class="action-btn" id="menu-btn">⋮</button>
+          <div class="dropdown-menu" id="dropdown-menu">
+            <div class="dropdown-item" onclick="window.location.href='send.html'">
+              📧 Blast Message
+            </div>
+            <div class="dropdown-item" onclick="window.location.href='config.html'">
+              ⚙️ Pengaturan
+            </div>
+            <div class="dropdown-item" id="logout-item">
+              🚪 Keluar
+            </div>
+          </div>
         </div>
       </div>
-      <div class="chat-item">
-        <div class="chat-avatar">+</div>
-        <div class="chat-content">
-          <div class="chat-name">+62 851-1754-5793</div>
-          <div class="chat-message">📞 iHo</div>
+      
+      <div class="search-container">
+        <div class="search-wrapper">
+          <div class="search-icon">🔍</div>
+          <input type="text" class="search-input" placeholder="Cari atau mulai chat baru">
         </div>
       </div>
-      <div class="chat-item">
-        <div class="chat-avatar">R</div>
-        <div class="chat-content">
-          <div class="chat-name">RiskiGunawan</div>
-          <div class="chat-message">📱 📤 📧</div>
-        </div>
+      
+      <div class="chat-list" id="chat-list">
+        <!-- Chat items will be dynamically loaded here -->
       </div>
     </div>
-  </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Welcome Screen -->
+      <div class="welcome-screen" id="welcome-screen">
+        <div class="welcome-logo"></div>
+        <div class="welcome-title">WhatsApp Bot</div>
+        <div class="welcome-text">
+          Kirim dan terima pesan menggunakan ponsel Anda.<br>
+          Gunakan WhatsApp di hingga 4 perangkat yang terhubung dan 1 ponsel secara bersamaan.
+        </div>
+        <div class="status-indicator" id="status-indicator">
+          <span>🔄</span>
+          <span id="status-text">Menunggu koneksi WhatsApp...</span>
+        </div>
+      </div>
+      
+      <!-- Chat View -->
+      <div id="chat-view" style="display: none; height: 100%; flex-direction: column;">
+        <div class="chat-header-main">
+          <div class="main-chat-avatar" id="main-chat-avatar">?</div>
+          <div class="main-chat-info">
+            <div class="main-chat-name" id="main-chat-name">Pilih Chat</div>
+            <div class="main-chat-status" id="main-chat-status">online</div>
+          </div>
+          <div class="header-actions">
+            <button class="action-btn">🔍</button>
+            <button class="action-btn">⋮</button>
+          </div>
+        </div>
+        
+        <div class="chat-messages" id="chat-messages">
+          <!-- Messages will be loaded here -->
+        </div>
 
-  <div class="main-content">
-    <div class="bot-title">WhatsAppBot</div>
-    <div class="login-text">Login via QR untuk menghubungkan akun WhatsApp kamu ke sistem bot</div>
-    <div class="status-text" id="status-text">🔄 Menunggu QR codedd...</div>
+        <div id="file-name-preview" style="font-size:12px; color:#54656f; padding: 0 16px;"></div>
+        <form class="message-input-container" id="chat-form" enctype="multipart/form-data">
+          <label for="message-file" class="action-btn" style="font-size: 20px;" title="Kirim file">📎</label>
+          <input type="file" id="message-file" accept="application/pdf" style="display: none;" />
+
+          <div class="input-wrapper">
+            <input type="text" class="message-input" id="message-input" placeholder="Ketik pesan atau kirim file">
+          </div>
+
+          <button type="submit" class="send-btn">➤</button>
+        </form>
+
+      </div>
+    </div>
   </div>
   
+  <!-- Logout Modal -->
   <div id="logout-modal" class="modal">
     <div class="modal-content">
-      <p>Apakah Anda yakin ingin logout?</p>
+      <div class="modal-title">Keluar dari WhatsApp Bot?</div>
+      <p style="color: #667781; font-size: 14px;">Anda akan keluar dari semua perangkat yang terhubung.</p>
       <div class="modal-buttons">
-        <button id="confirm-logout-btn" class="btn btn-confirm">Ya</button>
-        <button id="cancel-logout-btn" class="btn btn-cancel">Batal</button>
+        <button id="cancel-logout-btn" class="btn btn-secondary">Batal</button>
+        <button id="confirm-logout-btn" class="btn btn-primary">Keluar</button>
       </div>
     </div>
   </div>
 
-  <script>
-    // sessionStorage.setItem("fromIndex", "yes");
-    if (sessionStorage.getItem("fromIndex") !== "yes") {
-      alert("❌ Akses tidak sah. Silakan login lewat QR dulu.");
-      window.location.href = "index.html";
-    } else {
-      // Tandai bahwa user boleh masuk ke config.html
-      sessionStorage.setItem("fromPage", "yes");
-    }
-  </script>
+  <!-- Scripts -->
   <script src="/socket.io/socket.io.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.0/build/qrcode.min.js"></script>
   <script>
-    const socket = io(); // otomatis connect ke host yang sama dengan frontend
-    const qrContainer = document.getElementById("qr-container");
-    const statusText = document.getElementById("status-text");
-    let canvas = null;
-    socket.on("ready", () => {
-      if (canvas) {
-        qrContainer.removeChild(canvas);
-        canvas = null;
-      }
+  const socket = io(); // Hubungkan ke server socket
 
-      statusText.textContent = "✅ WhatsApp terhubung!";
-    });
+  if (sessionStorage.getItem("fromIndex") !== "yes") {
+    alert("❌ Akses tidak sah. Silakan login lewat QR dulu.");
+    // window.location.href = "index.html";
+  } else {
+    sessionStorage.setItem("fromPage", "yes");
+  }
 
-    // === Dropdown logic ===
-    const menuIcon = document.getElementById("menu-icon");
-    const dropdownMenu = document.getElementById("dropdown-menu");
-    const logoutItem = document.getElementById("logout-item");
+  // Elemen DOM
+  const statusText = document.getElementById("status-text");
+  const statusIndicator = document.getElementById("status-indicator");
+  const menuBtn = document.getElementById("menu-btn");
+  const dropdownMenu = document.getElementById("dropdown-menu");
+  const logoutItem = document.getElementById("logout-item");
+  const logoutModal = document.getElementById("logout-modal");
+  const confirmLogoutBtn = document.getElementById("confirm-logout-btn");
+  const cancelLogoutBtn = document.getElementById("cancel-logout-btn");
+  const chatList = document.getElementById("chat-list");
+  const welcomeScreen = document.getElementById("welcome-screen");
+  const chatView = document.getElementById("chat-view");
+  const messageInput = document.getElementById("message-input");
+  const sendBtn = document.getElementById("send-btn");
+  const chatMessages = document.getElementById("chat-messages");
 
-    menuIcon.addEventListener("click", () => {
-      dropdownMenu.style.display =
-        dropdownMenu.style.display === "flex" ? "none" : "flex";
-    });
+  let currentChatId = null;
+  let currentChatName = null;
 
-    document.addEventListener("click", (e) => {
-      if (
-        !menuIcon.contains(e.target) &&
-        !dropdownMenu.contains(e.target)
-      ) {
-        dropdownMenu.style.display = "none";
-      }
-    });
+  // === Socket Ready
+  socket.on("ready", () => {
+    statusText.textContent = "✅ WhatsApp terhubung!";
+    if (statusIndicator) {
+      statusIndicator.innerHTML = '<span>✅</span><span>WhatsApp terhubung</span>';
+      statusIndicator.style.background = 'rgba(0, 168, 132, 0.1)';
+    }
+    loadChatList();
+  });
 
-    // === Modal logic Logout ===
-    const logoutModal = document.getElementById("logout-modal");
-    const confirmLogoutBtn = document.getElementById("confirm-logout-btn");
-    const cancelLogoutBtn = document.getElementById("cancel-logout-btn");
+  // === Logout
+  menuBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+  });
 
-    logoutItem.addEventListener("click", () => {
-      dropdownMenu.style.display = "none";
-      logoutModal.style.display = "flex";
-    });
+  document.addEventListener("click", () => {
+    dropdownMenu.style.display = "none";
+  });
 
-    confirmLogoutBtn.addEventListener("click", () => {
-    console.log("✅ Tombol logout diklik");
-      sessionStorage.clear(); // atau set `fromIndex` = null
-      socket.emit("logout");
-      statusText.textContent = "🔄 Menunggu QR code...";
-      logoutModal.style.display = "none";
-      setTimeout(() => {
-        window.location.href = "index.html";
-      }, 900);
-    });
+  logoutItem?.addEventListener("click", () => {
+    dropdownMenu.style.display = "none";
+    logoutModal.style.display = "flex";
+  });
 
-    cancelLogoutBtn.addEventListener("click", () => {
-      logoutModal.style.display = "none";
-    });
-    // === Modal logic Logout End ===
+  confirmLogoutBtn?.addEventListener("click", () => {
+    sessionStorage.clear();
+    socket.emit("logout");
+    logoutModal.style.display = "none";
+    setTimeout(() => {
+      alert("Logout berhasil!");
+      window.location.href = "index.html";
+    }, 500);
+  });
 
-  </script>
+  cancelLogoutBtn?.addEventListener("click", () => {
+    logoutModal.style.display = "none";
+  });
+
+  // === Ambil daftar chat dari server
+  async function loadChatList() {
+    try {
+      const res = await fetch('/messages', {
+        headers: {
+          'x-api-key': 'kynd_X2n91cA38Dz73k5Mf81aZLq8Ld_f9083da98dfd092a8c5'
+        }
+      });
+
+      const chats = await res.json();
+      chatList.innerHTML = '';
+
+      chats.forEach(chat => {
+        const lastMsg = chat.messages.at(-1);
+        const chatName = chat.chatName || chat.chatId;
+        const chatId = chat.chatId;
+        const preview = lastMsg?.body || (lastMsg?.hasMedia ? '📎 File terkirim' : '(kosong)');
+
+        const div = document.createElement('div');
+        div.className = 'chat-item';
+        div.dataset.chatId = chatId;
+
+        const initial = chatName.charAt(0).toUpperCase();
+        const avatarColors = ['#00d2ff', '#667eea', '#f093fb', '#4facfe', '#43e97b'];
+        const color = avatarColors[Math.floor(Math.random() * avatarColors.length)];
+
+        div.innerHTML = `
+          <div class="chat-avatar" style="background: linear-gradient(135deg, ${color} 0%, ${color}88 100%)">${initial}</div>
+          <div class="chat-info">
+            <div class="chat-header">
+              <div class="chat-name">${chatName}</div>
+              <div class="chat-time">${lastMsg?.timestamp || ''}</div>
+            </div>
+            <div class="chat-message">
+              <span class="message-status">✓✓</span>
+              ${preview}
+            </div>
+          </div>
+        `;
+
+        div.addEventListener('click', () => openChat(chatId, chatName));
+        chatList.appendChild(div);
+      });
+
+    } catch (error) {
+      console.error('❌ Error loading chats:', error);
+      chatList.innerHTML = '<p style="color:red; padding:10px;">Gagal memuat chat.</p>';
+    }
+  }
+
+  // === Buka Chat
+  async function openChat(chatId, chatName) {
+    currentChatId = chatId;
+    currentChatName = chatName;
+
+    document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
+    const activeItem = document.querySelector(`[data-chat-id="${chatId}"]`);
+    if (activeItem) activeItem.classList.add('active');
+
+    welcomeScreen.style.display = 'none';
+    chatView.style.display = 'flex';
+
+    const initial = chatName.charAt(0).toUpperCase();
+    document.getElementById('main-chat-avatar').textContent = initial;
+    document.getElementById('main-chat-name').textContent = chatName;
+    document.getElementById('main-chat-status').textContent = 'online';
+
+    await loadMessages(chatId);
+  }
+
+  // === Ambil isi pesan dari backend
+  async function loadMessages(chatId) {
+    try {
+      const res = await fetch(`/messages/${chatId}`, {
+        headers: {
+          'x-api-key': 'kynd_X2n91cA38Dz73k5Mf81aZLq8Ld_f9083da98dfd092a8c5'
+        }
+      });
+      const data = await res.json();
+
+      chatMessages.innerHTML = '';
+      data.messages.forEach(msg => {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${msg.fromMe ? 'outgoing' : 'incoming'}`;
+        const jam = new Date(msg.timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        messageDiv.innerHTML = `
+          ${msg.body || (msg.hasMedia ? '<em>📎 File terkirim</em>' : '')}
+          <div class="message-time">${jam}</div>
+        `;
+        chatMessages.appendChild(messageDiv);
+      });
+
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    } catch (err) {
+      console.error('❌ Gagal load messages:', err);
+      chatMessages.innerHTML = '<p style="color:red;">Gagal memuat pesan</p>';
+    }
+  }
+
+  // === Kirim Pesan
+  document.getElementById('chat-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const text = messageInput.value.trim();
+  const file = document.getElementById('message-file').files[0];
+
+  if (!currentChatId) return alert("Pilih chat terlebih dahulu.");
+  if (!text && !file) return alert("Isi pesan atau pilih file terlebih dahulu.");
+
+  try {
+    // Kirim file jika ada
+    if (file) {
+      const formData = new FormData();
+      formData.append('number', currentChatId); // harus sesuai backend
+      formData.append('pdf', file); // sesuai field upload.single('pdf')
+
+      const res = await fetch('/upload-and-send', {
+        method: 'POST',
+        headers: { 'x-api-key': 'kynd_X2n91cA38Dz73k5Mf81aZLq8Ld_f9083da98dfd092a8c5' },
+        body: formData
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Gagal upload');
+      document.getElementById('message-file').value = ''; // reset input
+      document.getElementById('file-name-preview').textContent = ''; // hapus preview
+
+    }
+
+    // Kirim pesan jika ada
+    if (text) {
+      const res = await fetch('/send-message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': 'kynd_X2n91cA38Dz73k5Mf81aZLq8Ld_f9083da98dfd092a8c5'
+        },
+        body: JSON.stringify({ number: currentChatId, message: text })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Gagal kirim pesan');
+    }
+
+    // Kosongkan input
+    messageInput.value = '';
+    document.getElementById('message-file').value = '';
+
+    // Refresh pesan
+    await loadMessages(currentChatId);
+  } catch (err) {
+    alert("❌ Gagal mengirim: " + err.message);
+    console.error(err);
+  }
+});
+
+
+document.getElementById('message-file')?.addEventListener('change', (e) => {
+  const fileName = e.target.files[0]?.name;
+  document.getElementById('file-name-preview').textContent = fileName ? `📎 ${fileName}` : '';
+});
+
+
+  // Initial load
+  window.addEventListener('load', () => {
+    socket.emit("ready"); // untuk simulasi
+  });
+</script>
+
 </body>
 </html>

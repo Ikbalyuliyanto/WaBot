@@ -10,6 +10,64 @@ const upload = multer({ dest: 'uploads/' });
 
 // Ambil client dari parameter fungsi ekspor nanti
 let client;
+// menampilkan semua chat
+// GET: Ambil semua pesan dari semua chat
+router.get('/messages', async (req, res) => {
+    try {
+        if (!client) {
+            return res.status(503).json({ message: '❌ Client belum siap.' });
+        }
+
+        const chats = await client.getChats();
+        const result = [];
+
+        for (const chat of chats) {
+            const messages = await chat.fetchMessages({ limit: 20 }); // Bisa diubah jumlahnya
+            result.push({
+                chatName: chat.name || chat.id.user || 'Unknown',
+                chatId: chat.id._serialized,
+                messages: messages.map(msg => ({
+                    fromMe: msg.fromMe,
+                    sender: msg.author || msg.from,
+                    body: msg.body,
+                    timestamp: msg.timestamp,
+                    hasMedia: msg.hasMedia || false
+                }))
+            });
+        }
+
+        res.json(result);
+    } catch (error) {
+        console.error('❌ Gagal ambil pesan:', error.message);
+        res.status(500).json({ message: 'Gagal mengambil pesan', error: error.message });
+    }
+});
+// GET: Ambil riwayat pesan dari 1 chat tertentu berdasarkan chatId
+router.get('/messages/:chatId', async (req, res) => {
+  try {
+    if (!client) {
+      return res.status(503).json({ message: '❌ Client belum siap.' });
+    }
+
+    const chatId = req.params.chatId;
+
+    const chat = await client.getChatById(chatId);
+    const messages = await chat.fetchMessages({ limit: 50 }); // ambil 50 pesan terakhir
+
+    res.json({
+      messages: messages.map(msg => ({
+        fromMe: msg.fromMe,
+        sender: msg.author || msg.from,
+        body: msg.body,
+        timestamp: msg.timestamp,
+        hasMedia: msg.hasMedia || false
+      }))
+    });
+  } catch (error) {
+    console.error('❌ Gagal ambil chat:', error.message);
+    res.status(500).json({ message: 'Gagal mengambil detail chat', error: error.message });
+  }
+});
 
 // API: Kirim pesan teks
 router.post('/send-message', async (req, res) => {
