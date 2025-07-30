@@ -1,0 +1,56 @@
+name: WabotAutoDeploy
+
+on:
+  push:
+    branches:
+      - WhatsappBotFile  # Ganti jika nama branch berbeda
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup SSH Connection
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY_BACKEND }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.SSH_IP_BACKEND }} >> ~/.ssh/known_hosts
+
+    - name: Deploy to Server
+      run: |
+        ssh ${{ secrets.SSH_USER_BACKEND }}@${{ secrets.SSH_IP_BACKEND }} << 'EOF'
+
+          cd ~/wabot  # Ganti ke path direktori project 'wabot' di server kamu
+
+          echo "Resetting local changes..."
+          git reset --hard origin/QuilvianDev
+          git clean -fd
+
+          echo "Pulling latest changes..."
+          git pull origin QuilvianDev
+
+          IMAGE_NAME="wabot-image"
+          CONTAINER_NAME="wabot-container"
+
+          DEPLOY_TIME=$(date +"%A, %d-%m-%Y %H:%M:%S") 
+
+          echo "Building new Docker image..."
+          docker build -t $IMAGE_NAME .
+
+          echo "Stopping and removing old container..."
+          docker stop $CONTAINER_NAME || true
+          docker rm $CONTAINER_NAME || true
+
+          echo "Running new container..."
+          docker run -d --name $CONTAINER_NAME -p 3000:3000 $IMAGE_NAME
+
+          echo "Cleaning up unused Docker images..."
+          docker system prune -af
+
+          echo "Deployment completed!"
+
+        EOF
