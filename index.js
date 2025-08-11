@@ -25,7 +25,7 @@ const { API_KEY } = require('./config/constants');
 // Middleware API Key
 app.use((req, res, next) => {
   const clientKey = req.headers['x-api-key'];
-  if (!clientKey || clientKey !== API_KEY) {
+  if (!clientKey || clientKey !== API_KEY  || clientKey !== cachedToken ) {
     return res.status(403).json({ message: '❌ API Key tidak valid.' });
   }
   next();

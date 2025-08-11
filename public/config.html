@@ -338,16 +338,12 @@
   </div>
 
   <script>    
-    // sessionStorage.setItem("fromIndex", "yes");
-    if (sessionStorage.getItem("fromIndex") !== "yes") {
-      alert("❌ Akses tidak sah. Silakan login lewat QR dulu.");
-      window.location.href = "index.html";
-    } else {
-      // Tandai bahwa user boleh masuk ke config.html
-      sessionStorage.setItem("fromPage", "yes");
+    const API_KEY = sessionStorage.getItem("apiKey");
+    if (!API_KEY) {
+      // ❌ Belum login, redirect ke login
+      window.location.href = "login.html";
     }
 
-    const API_KEY = 'kynd_X2n91cA38Dz73k5Mf81aZLq8Ld_f9083da98dfd092a8c5';
     const form = document.getElementById('configForm');
     const savedDataDiv = document.getElementById('savedData');
     const loadingDiv = document.getElementById('loading');
@@ -492,17 +488,6 @@
         this.parentElement.style.transform = 'scale(1)';
       });
     });
-  </script>
-
-  
-  <script>
-    if (sessionStorage.getItem("fromPage") !== "yes") {
-      alert("❌ Akses ke Config ditolak. Silakan masuk dari halaman utama.");
-      window.location.href = "index.html";
-    } else {
-      // Optional: hapus flag agar user tidak bisa reload terus
-      sessionStorage.removeItem("fromPage");
-    }
   </script>
 </body>
 </html>

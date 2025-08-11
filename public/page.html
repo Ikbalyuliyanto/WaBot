@@ -620,241 +620,229 @@
   <!-- Scripts -->
   <script src="/socket.io/socket.io.js"></script>
   <script>
-  const socket = io(); // Hubungkan ke server socket
-
-  if (sessionStorage.getItem("fromIndex") !== "yes") {
-    alert("❌ Akses tidak sah. Silakan login lewat QR dulu.");
-    // window.location.href = "index.html";
-  } else {
-    sessionStorage.setItem("fromPage", "yes");
-  }
-
-  // Elemen DOM
-  const statusText = document.getElementById("status-text");
-  const statusIndicator = document.getElementById("status-indicator");
-  const menuBtn = document.getElementById("menu-btn");
-  const dropdownMenu = document.getElementById("dropdown-menu");
-  const logoutItem = document.getElementById("logout-item");
-  const logoutModal = document.getElementById("logout-modal");
-  const confirmLogoutBtn = document.getElementById("confirm-logout-btn");
-  const cancelLogoutBtn = document.getElementById("cancel-logout-btn");
-  const chatList = document.getElementById("chat-list");
-  const welcomeScreen = document.getElementById("welcome-screen");
-  const chatView = document.getElementById("chat-view");
-  const messageInput = document.getElementById("message-input");
-  const sendBtn = document.getElementById("send-btn");
-  const chatMessages = document.getElementById("chat-messages");
-
-  let currentChatId = null;
-  let currentChatName = null;
-
-  // === Socket Ready
-  socket.on("ready", () => {
-    statusText.textContent = "✅ WhatsApp terhubung!";
-    if (statusIndicator) {
-      statusIndicator.innerHTML = '<span>✅</span><span>WhatsApp terhubung</span>';
-      statusIndicator.style.background = 'rgba(0, 168, 132, 0.1)';
+    // ========== [SESSION CHECK] ==========
+    const API_KEY = sessionStorage.getItem("apiKey");
+    if (!API_KEY) {
+      window.location.href = "login.html";
     }
-    loadChatList();
-  });
 
-  // === Logout
-  menuBtn?.addEventListener("click", (e) => {
-    e.stopPropagation();
-    dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
-  });
+    // ========== [DOM ELEMENTS] ==========
+    const socket = io(); // Hubungkan socket
+    const statusText = document.getElementById("status-text");
+    const statusIndicator = document.getElementById("status-indicator");
+    const menuBtn = document.getElementById("menu-btn");
+    const dropdownMenu = document.getElementById("dropdown-menu");
+    const logoutItem = document.getElementById("logout-item");
+    const logoutModal = document.getElementById("logout-modal");
+    const confirmLogoutBtn = document.getElementById("confirm-logout-btn");
+    const cancelLogoutBtn = document.getElementById("cancel-logout-btn");
+    const chatList = document.getElementById("chat-list");
+    const welcomeScreen = document.getElementById("welcome-screen");
+    const chatView = document.getElementById("chat-view");
+    const messageInput = document.getElementById("message-input");
+    const sendBtn = document.getElementById("send-btn");
+    const chatMessages = document.getElementById("chat-messages");
+    const fileInput = document.getElementById("message-file");
+    const filePreview = document.getElementById("file-name-preview");
 
-  document.addEventListener("click", () => {
-    dropdownMenu.style.display = "none";
-  });
+    let currentChatId = null;
+    let currentChatName = null;
 
-  logoutItem?.addEventListener("click", () => {
-    dropdownMenu.style.display = "none";
-    logoutModal.style.display = "flex";
-  });
+    // ========== [SOCKET READY] ==========
+    socket.on("ready", () => {
+      statusText.textContent = "✅ WhatsApp terhubung!";
+      if (statusIndicator) {
+        statusIndicator.innerHTML = '<span>✅</span><span>WhatsApp terhubung</span>';
+        statusIndicator.style.background = 'rgba(0, 168, 132, 0.1)';
+      }
+      loadChatList();
+    });
 
-  confirmLogoutBtn?.addEventListener("click", () => {
-    sessionStorage.clear();
-    socket.emit("logout");
-    logoutModal.style.display = "none";
-    setTimeout(() => {
-      alert("Logout berhasil!");
-      window.location.href = "index.html";
-    }, 500);
-  });
+    // ========== [MENU & LOGOUT] ==========
+    menuBtn?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+    });
 
-  cancelLogoutBtn?.addEventListener("click", () => {
-    logoutModal.style.display = "none";
-  });
+    document.addEventListener("click", () => {
+      dropdownMenu.style.display = "none";
+    });
 
-  // === Ambil daftar chat dari server
-  async function loadChatList() {
-    try {
-      const res = await fetch('/messages', {
-        headers: {
-          'x-api-key': 'kynd_X2n91cA38Dz73k5Mf81aZLq8Ld_f9083da98dfd092a8c5'
-        }
-      });
+    logoutItem?.addEventListener("click", () => {
+      dropdownMenu.style.display = "none";
+      logoutModal.style.display = "flex";
+    });
 
-      const chats = await res.json();
-      chatList.innerHTML = '';
+    confirmLogoutBtn?.addEventListener("click", () => {
+      sessionStorage.clear();
+      socket.emit("logout");
+      logoutModal.style.display = "none";
+      setTimeout(() => {
+        alert("Logout berhasil!");
+        window.location.href = "index.html";
+      }, 500);
+    });
 
-      chats.forEach(chat => {
-        const lastMsg = chat.messages.at(-1);
-        const chatName = chat.chatName || chat.chatId;
-        const chatId = chat.chatId;
-        const preview = lastMsg?.body || (lastMsg?.hasMedia ? '📎 File terkirim' : '(kosong)');
+    cancelLogoutBtn?.addEventListener("click", () => {
+      logoutModal.style.display = "none";
+    });
 
-        const div = document.createElement('div');
-        div.className = 'chat-item';
-        div.dataset.chatId = chatId;
+    // ========== [LOAD CHAT LIST] ==========
+    async function loadChatList() {
+      try {
+        const res = await fetch('/messages', {
+          headers: { 'x-api-key': API_KEY }
+        });
+        const chats = await res.json();
+        chatList.innerHTML = '';
 
-        const initial = chatName.charAt(0).toUpperCase();
-        const avatarColors = ['#00d2ff', '#667eea', '#f093fb', '#4facfe', '#43e97b'];
-        const color = avatarColors[Math.floor(Math.random() * avatarColors.length)];
+        chats.forEach(chat => {
+          const lastMsg = chat.messages.at(-1);
+          const chatName = chat.chatName || chat.chatId;
+          const chatId = chat.chatId;
+          const preview = lastMsg?.body || (lastMsg?.hasMedia ? '📎 File terkirim' : '(kosong)');
 
-        div.innerHTML = `
-          <div class="chat-avatar" style="background: linear-gradient(135deg, ${color} 0%, ${color}88 100%)">${initial}</div>
-          <div class="chat-info">
-            <div class="chat-header">
-              <div class="chat-name">${chatName}</div>
-              <div class="chat-time">${lastMsg?.timestamp || ''}</div>
+          const div = document.createElement('div');
+          div.className = 'chat-item';
+          div.dataset.chatId = chatId;
+
+          const initial = chatName.charAt(0).toUpperCase();
+          const avatarColors = ['#00d2ff', '#667eea', '#f093fb', '#4facfe', '#43e97b'];
+          const color = avatarColors[Math.floor(Math.random() * avatarColors.length)];
+
+          div.innerHTML = `
+            <div class="chat-avatar" style="background: linear-gradient(135deg, ${color} 0%, ${color}88 100%)">${initial}</div>
+            <div class="chat-info">
+              <div class="chat-header">
+                <div class="chat-name">${chatName}</div>
+                <div class="chat-time">${lastMsg?.timestamp || ''}</div>
+              </div>
+              <div class="chat-message">
+                <span class="message-status">✓✓</span>
+                ${preview}
+              </div>
             </div>
-            <div class="chat-message">
-              <span class="message-status">✓✓</span>
-              ${preview}
-            </div>
-          </div>
-        `;
+          `;
+          div.addEventListener('click', () => openChat(chatId, chatName));
+          chatList.appendChild(div);
+        });
 
-        div.addEventListener('click', () => openChat(chatId, chatName));
-        chatList.appendChild(div);
-      });
-
-    } catch (error) {
-      console.error('❌ Error loading chats:', error);
-      chatList.innerHTML = '<p style="color:red; padding:10px;">Gagal memuat chat.</p>';
+      } catch (error) {
+        console.error('❌ Error loading chats:', error);
+        chatList.innerHTML = '<p style="color:red; padding:10px;">Gagal memuat chat.</p>';
+      }
     }
-  }
 
-  // === Buka Chat
-  async function openChat(chatId, chatName) {
-    currentChatId = chatId;
-    currentChatName = chatName;
+    // ========== [OPEN CHAT] ==========
+    async function openChat(chatId, chatName) {
+      currentChatId = chatId;
+      currentChatName = chatName;
 
-    document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
-    const activeItem = document.querySelector(`[data-chat-id="${chatId}"]`);
-    if (activeItem) activeItem.classList.add('active');
+      document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
+      const activeItem = document.querySelector(`[data-chat-id="${chatId}"]`);
+      if (activeItem) activeItem.classList.add('active');
 
-    welcomeScreen.style.display = 'none';
-    chatView.style.display = 'flex';
+      welcomeScreen.style.display = 'none';
+      chatView.style.display = 'flex';
 
-    const initial = chatName.charAt(0).toUpperCase();
-    document.getElementById('main-chat-avatar').textContent = initial;
-    document.getElementById('main-chat-name').textContent = chatName;
-    document.getElementById('main-chat-status').textContent = 'online';
+      const initial = chatName.charAt(0).toUpperCase();
+      document.getElementById('main-chat-avatar').textContent = initial;
+      document.getElementById('main-chat-name').textContent = chatName;
+      document.getElementById('main-chat-status').textContent = 'online';
 
-    await loadMessages(chatId);
-  }
+      await loadMessages(chatId);
+    }
 
-  // === Ambil isi pesan dari backend
-  async function loadMessages(chatId) {
-    try {
-      const res = await fetch(`/messages/${chatId}`, {
-        headers: {
-          'x-api-key': 'kynd_X2n91cA38Dz73k5Mf81aZLq8Ld_f9083da98dfd092a8c5'
+    // ========== [LOAD MESSAGES] ==========
+    async function loadMessages(chatId) {
+      try {
+        const res = await fetch(`/messages/${chatId}`, {
+          headers: { 'x-api-key': API_KEY }
+        });
+        const data = await res.json();
+        chatMessages.innerHTML = '';
+
+        data.messages.forEach(msg => {
+          const messageDiv = document.createElement('div');
+          messageDiv.className = `message ${msg.fromMe ? 'outgoing' : 'incoming'}`;
+          const jam = new Date(msg.timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+          messageDiv.innerHTML = `
+            ${msg.body || (msg.hasMedia ? '<em>📎 File terkirim</em>' : '')}
+            <div class="message-time">${jam}</div>
+          `;
+          chatMessages.appendChild(messageDiv);
+        });
+
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      } catch (err) {
+        console.error('❌ Gagal load messages:', err);
+        chatMessages.innerHTML = '<p style="color:red;">Gagal memuat pesan</p>';
+      }
+    }
+
+    // ========== [KIRIM PESAN & FILE] ==========
+    document.getElementById('chat-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = messageInput.value.trim();
+      const file = fileInput.files[0];
+
+      if (!currentChatId) return alert("Pilih chat terlebih dahulu.");
+      if (!text && !file) return alert("Isi pesan atau pilih file terlebih dahulu.");
+
+      try {
+        // Upload file
+        if (file) {
+          const formData = new FormData();
+          formData.append('number', currentChatId);
+          formData.append('pdf', file); // pastikan sesuai field di backend
+
+          const res = await fetch('/upload-and-send', {
+            method: 'POST',
+            headers: { 'x-api-key': API_KEY },
+            body: formData
+          });
+
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || 'Gagal upload file');
+          fileInput.value = '';
+          filePreview.textContent = '';
         }
-      });
-      const data = await res.json();
 
-      chatMessages.innerHTML = '';
-      data.messages.forEach(msg => {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${msg.fromMe ? 'outgoing' : 'incoming'}`;
-        const jam = new Date(msg.timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        // Kirim pesan teks
+        if (text) {
+          const res = await fetch('/send-message', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': API_KEY
+            },
+            body: JSON.stringify({ number: currentChatId, message: text })
+          });
 
-        messageDiv.innerHTML = `
-          ${msg.body || (msg.hasMedia ? '<em>📎 File terkirim</em>' : '')}
-          <div class="message-time">${jam}</div>
-        `;
-        chatMessages.appendChild(messageDiv);
-      });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || 'Gagal kirim pesan');
+        }
 
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    } catch (err) {
-      console.error('❌ Gagal load messages:', err);
-      chatMessages.innerHTML = '<p style="color:red;">Gagal memuat pesan</p>';
-    }
-  }
+        messageInput.value = '';
+        fileInput.value = '';
+        await loadMessages(currentChatId);
+      } catch (err) {
+        alert("❌ Gagal mengirim: " + err.message);
+        console.error(err);
+      }
+    });
 
-  // === Kirim Pesan
-  document.getElementById('chat-form')?.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const text = messageInput.value.trim();
-  const file = document.getElementById('message-file').files[0];
+    // ========== [FILE PREVIEW] ==========
+    fileInput?.addEventListener('change', (e) => {
+      const fileName = e.target.files[0]?.name;
+      filePreview.textContent = fileName ? `📎 ${fileName}` : '';
+    });
 
-  if (!currentChatId) return alert("Pilih chat terlebih dahulu.");
-  if (!text && !file) return alert("Isi pesan atau pilih file terlebih dahulu.");
-
-  try {
-    // Kirim file jika ada
-    if (file) {
-      const formData = new FormData();
-      formData.append('number', currentChatId); // harus sesuai backend
-      formData.append('pdf', file); // sesuai field upload.single('pdf')
-
-      const res = await fetch('/upload-and-send', {
-        method: 'POST',
-        headers: { 'x-api-key': 'kynd_X2n91cA38Dz73k5Mf81aZLq8Ld_f9083da98dfd092a8c5' },
-        body: formData
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Gagal upload');
-      document.getElementById('message-file').value = ''; // reset input
-      document.getElementById('file-name-preview').textContent = ''; // hapus preview
-
-    }
-
-    // Kirim pesan jika ada
-    if (text) {
-      const res = await fetch('/send-message', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': 'kynd_X2n91cA38Dz73k5Mf81aZLq8Ld_f9083da98dfd092a8c5'
-        },
-        body: JSON.stringify({ number: currentChatId, message: text })
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Gagal kirim pesan');
-    }
-
-    // Kosongkan input
-    messageInput.value = '';
-    document.getElementById('message-file').value = '';
-
-    // Refresh pesan
-    await loadMessages(currentChatId);
-  } catch (err) {
-    alert("❌ Gagal mengirim: " + err.message);
-    console.error(err);
-  }
-});
-
-
-document.getElementById('message-file')?.addEventListener('change', (e) => {
-  const fileName = e.target.files[0]?.name;
-  document.getElementById('file-name-preview').textContent = fileName ? `📎 ${fileName}` : '';
-});
-
-
-  // Initial load
-  window.addEventListener('load', () => {
-    socket.emit("ready"); // untuk simulasi
-  });
-</script>
-
+    // ========== [TRIGGER INITIAL] ==========
+    window.addEventListener('load', () => {
+      socket.emit("ready"); // trigger simulasi jika diperlukan
+    });
+  </script>
 </body>
 </html>

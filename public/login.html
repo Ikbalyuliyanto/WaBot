@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated background particles */
+        .bg-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(79, 172, 254, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .particle:nth-child(1) { width: 20px; height: 20px; left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { width: 15px; height: 15px; left: 20%; animation-delay: 1s; }
+        .particle:nth-child(3) { width: 25px; height: 25px; left: 30%; animation-delay: 2s; }
+        .particle:nth-child(4) { width: 18px; height: 18px; left: 40%; animation-delay: 3s; }
+        .particle:nth-child(5) { width: 22px; height: 22px; left: 50%; animation-delay: 0.5s; }
+        .particle:nth-child(6) { width: 16px; height: 16px; left: 60%; animation-delay: 1.5s; }
+        .particle:nth-child(7) { width: 24px; height: 24px; left: 70%; animation-delay: 2.5s; }
+        .particle:nth-child(8) { width: 19px; height: 19px; left: 80%; animation-delay: 3.5s; }
+        .particle:nth-child(9) { width: 21px; height: 21px; left: 90%; animation-delay: 4s; }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Glowing orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        .orb1 {
+            width: 200px;
+            height: 200px;
+            background: rgba(79, 172, 254, 0.3);
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .orb2 {
+            width: 150px;
+            height: 150px;
+            background: rgba(138, 43, 226, 0.2);
+            bottom: 20%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1) translateY(0px); opacity: 0.3; }
+            50% { transform: scale(1.2) translateY(-20px); opacity: 0.6; }
+        }
+
+        /* Login container */
+        .login-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            width: 400px;
+            max-width: 90vw;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            animation: slideUp 1s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(50px); opacity: 0; }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-title {
+            color: #fff;
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: brightness(1); }
+            to { filter: brightness(1.2); }
+        }
+
+        .login-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1em;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .form-group input:focus {
+            border-color: #4facfe;
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .form-group input:focus + .input-icon {
+            color: #4facfe;
+            transform: scale(1.1);
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+            font-size: 1.2em;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            border: none;
+            border-radius: 50px;
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(79, 172, 254, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .login-btn:hover::before {
+            left: 100%;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .divider span {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 0 20px;
+            position: relative;
+        }
+
+        .social-login {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .social-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.2em;
+        }
+
+        .social-btn:hover {
+            transform: translateY(-3px) scale(1.1);
+            border-color: #4facfe;
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .social-btn.google { color: #db4437; }
+        .social-btn.facebook { color: #4267B2; }
+        .social-btn.twitter { color: #1DA1F2; }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .forgot-password a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password a:hover {
+            color: #4facfe;
+        }
+
+        /* Logout key button */
+        .logout-key {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 15;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            animation: fadeInKey 1s ease-out 1.5s forwards;
+        }
+
+        @keyframes fadeInKey {
+            from { opacity: 0; transform: translateY(-20px) rotate(-45deg); }
+            to { opacity: 1; transform: translateY(0) rotate(0deg); }
+        }
+
+        .logout-key:hover {
+            transform: translateY(-3px) scale(1.1) rotate(15deg);
+            border-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.2);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+        }
+
+        .logout-key:active {
+            transform: translateY(0) scale(1.05) rotate(0deg);
+        }
+
+        .key-icon {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .logout-key:hover .key-icon {
+            color: #ff6b6b;
+            transform: rotate(-15deg);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: translateY(-50px) scale(0.9); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        .modal-title {
+            color: #fff;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 30px 20px;
+            }
+            
+            .login-title {
+                font-size: 2em;
+            }
+
+            .modal-content {
+                padding: 25px 20px;
+            }
+
+            .modal-buttons {
+                flex-direction: column;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated background -->
+    <div class="bg-animation">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <!-- Glowing orbs -->
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+
+    <!-- Login container -->
+    <div class="login-container">
+        <!-- Logout key button -->
+        <div class="logout-key" onclick="showLogoutModal()" title="Logout" id="logout-item">
+            <span class="key-icon">🔑</span>
+        </div>
+
+        <div class="login-header">
+            <h1 class="login-title">Welcome</h1>
+            <p class="login-subtitle">Please sign in to your account</p>
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <input type="email" placeholder="Email Address" required>
+                <span class="input-icon">📧</span>
+            </div>
+
+            <div class="form-group">
+                <input type="password" placeholder="Password" required>
+                <span class="input-icon">🔒</span>
+            </div>
+
+            <button type="submit" class="login-btn">
+                <span class="loading"></span>
+                <span class="btn-text">Sign In</span>
+            </button>
+        </form>
+
+        <div class="divider">
+        </div>
+
+        <div class="social-login">
+            <a href="https://www.google.com/"><div class="social-btn google">G</div></a>
+            <a href="https://www.facebook.com/"><div class="social-btn facebook">f</div></a>
+            <a href="#"><div class="social-btn twitter">🐦</div></a>
+        </div>
+
+        <div class="forgot-password">
+            <a href="#" onclick="showForgotPassword()">Forgot your password?</a>
+        </div>
+    </div>
+
+    <!-- Logout Modal -->
+    <div id="logout-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">Keluar dari WhatsApp Bot?</div>
+            <p style="color: rgba(255, 255, 255, 0.7); font-size: 14px; margin-bottom: 10px;">Anda akan keluar dari semua perangkat yang terhubung.</p>
+            <div class="modal-buttons">
+                <button id="cancel-logout-btn" class="btn btn-secondary">Batal</button>
+                <button id="confirm-logout-btn" class="btn btn-primary">Keluar</button>
+            </div>
+        </div>
+    </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+    <script>      
+        const socket = io();  
+        // Modal Elements
+        const logoutModal = document.getElementById("logout-modal");
+        const confirmLogoutBtn = document.getElementById("confirm-logout-btn");
+        const cancelLogoutBtn = document.getElementById("cancel-logout-btn");
+
+        // Show logout modal
+        function showLogoutModal() {
+            logoutModal.style.display = "flex";
+        }
+
+        // Hide logout modal
+        function hideLogoutModal() {
+            logoutModal.style.display = "none";
+        }
+
+        // Cancel logout
+        cancelLogoutBtn.addEventListener("click", hideLogoutModal);
+
+        // Confirm logout
+        confirmLogoutBtn.addEventListener("click", function() {
+            // Clear session storage
+            if (typeof(Storage) !== "undefined") {
+                sessionStorage.clear();
+            }
+            
+            socket.emit("logout");
+            // Hide modal
+            hideLogoutModal();
+            
+            // Show success message and redirect
+            setTimeout(() => {
+                window.location.href = "index.html";
+            }, 1000);
+        });
+
+        // Close modal when clicking outside
+        logoutModal.addEventListener("click", function(e) {
+            if (e.target === logoutModal) {
+                hideLogoutModal();
+            }
+        });
+
+        // Social login buttons
+        document.querySelectorAll('.social-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.style.transform = 'translateY(-3px) scale(1.1)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 200);
+            });
+        });
+
+        // Forgot password function
+        function showForgotPassword() {
+            alert('Password reset link will be sent to your email!');
+        }
+
+        // Add floating animation to form inputs
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'translateY(-2px)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Create more particles dynamically
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.width = particle.style.height = Math.random() * 10 + 15 + 'px';
+            particle.style.animationDelay = Math.random() * 6 + 's';
+            particle.style.animationDuration = Math.random() * 3 + 6 + 's';
+            
+            document.querySelector('.bg-animation').appendChild(particle);
+            
+            setTimeout(() => {
+                particle.remove();
+            }, 9000);
+        }
+
+        // Generate particles continuously
+        setInterval(createParticle, 800);
+    </script>
+    <script>
+        const API_KEY = 'kynd_X2n91cA38Dz73k5Mf81aZLq8Ld_f9083da98dfd092a8c5';
+
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const emailInput = this.querySelector('input[type="email"]').value.trim();
+            const passwordInput = this.querySelector('input[type="password"]').value;
+
+            const button = this.querySelector('.login-btn');
+            const loading = button.querySelector('.loading');
+            const btnText = button.querySelector('.btn-text');
+
+            loading.style.display = 'inline-block';
+            btnText.textContent = 'Signing In...';
+            button.disabled = true;
+
+            try {
+            // Ambil config.json
+            const res = await fetch('/config', {
+                headers: { 'x-api-key': API_KEY }
+            });
+            const data = await res.json();
+
+            const valid = emailInput === data.userapi && passwordInput === data.passwordapi;
+
+            if (valid) {
+                sessionStorage.setItem("userEmail", emailInput);
+                sessionStorage.setItem("apiKey", API_KEY);
+                btnText.textContent = 'Success!';
+                button.style.background = 'linear-gradient(45deg, #00b894, #00cec9)';
+                return setTimeout(() => window.location.href = "page.html", 1000);
+            }
+
+            // 🔁 Jika login lokal gagal, coba login ke Swagger
+            const response = await fetch("http://160.20.104.98/api/Auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: emailInput, password: passwordInput })
+            });
+
+            if (!response.ok) throw new Error("Login ke API gagal");
+
+            const apiData = await response.json();
+            const token = apiData.token;
+
+            sessionStorage.setItem("userEmail", emailInput);
+            sessionStorage.setItem("apiKey", token);
+            btnText.textContent = 'Logged in via API!';
+            button.style.background = 'linear-gradient(45deg, #00b894, #00cec9)';
+            setTimeout(() => window.location.href = "page.html", 1000);
+
+            } catch (err) {
+            console.error("❌ Gagal login:", err);
+            alert("Login gagal. Periksa email/password!");
+            resetButton();
+            }
+
+            function resetButton() {
+            loading.style.display = 'none';
+            btnText.textContent = 'Sign In';
+            button.disabled = false;
+            button.style.background = 'linear-gradient(45deg, #4facfe, #00f2fe)';
+            }
+        });
+    </script>
+
+</body>
+</html>

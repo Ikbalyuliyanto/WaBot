@@ -475,8 +475,13 @@
     </div>
 
   </div>
-  <script>
-    const API_KEY = 'kynd_X2n91cA38Dz73k5Mf81aZLq8Ld_f9083da98dfd092a8c5';
+  <script>      
+    const API_KEY = sessionStorage.getItem("apiKey");
+    if (!API_KEY) {
+      // ❌ Belum login, redirect ke login
+      window.location.href = "login.html";
+    }
+
     //loading
     function showLoader() {
       document.getElementById('loader').style.display = 'block';

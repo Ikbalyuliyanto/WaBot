@@ -4,7 +4,7 @@ const fs = require('fs');
 const multer = require('multer');
 const { MessageMedia } = require('whatsapp-web.js');
 const { kirimEmailWithAttachment } = require('../services/emailService');
-
+const verifyToken = require('../middlewares/verifyToken');
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
 
