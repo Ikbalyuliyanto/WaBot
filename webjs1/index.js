@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Import modular
-// const { router: apiRoutes, setClient } = require('./routes/apiRoutes');
+const { router: apiRoutes, setClient } = require('./routes/apiRoutes');
 const handleMessage = require('./handlers/messageHandler');
 
 // Key 
@@ -32,7 +32,7 @@ const handleMessage = require('./handlers/messageHandler');
 // });
 
 // Modular route
-// app.use('/', apiRoutes);
+app.use('/', apiRoutes);
 // Key End
 
 const SESSION_PATH = './.wwebjs_auth';
