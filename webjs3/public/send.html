@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Portal Kirim Pesan</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      color: white;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .header p {
+      color: rgba(255,255,255,0.9);
+      font-size: 1.1rem;
+      font-weight: 300;
+    }
+
+    .form-section {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+      border: 1px solid rgba(255,255,255,0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .form-section:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+    }
+
+    .form-section h3 {
+      color: #4a5568;
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-section h3::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      border-radius: 2px;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+    }
+
+    .column {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #4a5568;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 15px 20px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: white;
+      position: relative;
+    }
+
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      transform: translateY(-2px);
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px 25px;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    button:hover::before {
+      left: 100%;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .whatsapp-section {
+      background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+      color: white;
+    }
+
+    .whatsapp-section h3 {
+      color: white;
+    }
+
+    .whatsapp-section label {
+      color: rgba(255,255,255,0.9);
+    }
+
+    .whatsapp-section input,
+    .whatsapp-section textarea {
+      background: rgba(255,255,255,0.15);
+      border: 2px solid rgba(255,255,255,0.3);
+      color: white;
+      backdrop-filter: blur(10px);
+    }
+
+    .whatsapp-section input::placeholder,
+    .whatsapp-section textarea::placeholder {
+      color: rgba(255,255,255,0.7);
+    }
+
+    .whatsapp-section input:focus,
+    .whatsapp-section textarea:focus {
+      border-color: rgba(255,255,255,0.6);
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.1);
+    }
+
+    .whatsapp-section button {
+      background: rgba(255,255,255,0.2);
+      border: 2px solid rgba(255,255,255,0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    .whatsapp-section button:hover {
+      background: rgba(255,255,255,0.3);
+      border-color: rgba(255,255,255,0.5);
+    }
+
+    .email-section {
+      background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+      color: white;
+    }
+
+    .email-section h3 {
+      color: white;
+    }
+
+    .email-section label {
+      color: rgba(255,255,255,0.9);
+    }
+
+    .email-section input,
+    .email-section textarea {
+      background: rgba(255,255,255,0.15);
+      border: 2px solid rgba(255,255,255,0.3);
+      color: white;
+      backdrop-filter: blur(10px);
+    }
+
+    .email-section input::placeholder,
+    .email-section textarea::placeholder {
+      color: rgba(255,255,255,0.7);
+    }
+
+    .email-section input:focus,
+    .email-section textarea:focus {
+      border-color: rgba(255,255,255,0.6);
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.1);
+    }
+
+    .email-section button {
+      background: rgba(255,255,255,0.2);
+      border: 2px solid rgba(255,255,255,0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    .email-section button:hover {
+      background: rgba(255,255,255,0.3);
+      border-color: rgba(255,255,255,0.5);
+    }
+
+    #status {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 15px;
+      font-weight: 600;
+      color: #2d3748;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.3);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-input-wrapper input[type=file] {
+      position: absolute;
+      left: -9999px;
+    }
+
+    .file-input-label {
+      display: block;
+      width: 100%;
+      padding: 15px 20px;
+      background: rgba(255,255,255,0.1);
+      border: 2px dashed rgba(255,255,255,0.3);
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: rgba(255,255,255,0.8);
+    }
+
+    .file-input-label:hover {
+      background: rgba(255,255,255,0.2);
+      border-color: rgba(255,255,255,0.5);
+    }
+
+    .form-section:not(.whatsapp-section):not(.email-section) .file-input-label {
+      background: #f8f9fa;
+      border-color: #e2e8f0;
+      color: #4a5568;
+    }
+
+    .form-section:not(.whatsapp-section):not(.email-section) .file-input-label:hover {
+      background: #e2e8f0;
+      border-color: #667eea;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+
+      .header h1 {
+        font-size: 2rem;
+      }
+
+      .row {
+        flex-direction: column;
+      }
+
+      .form-section {
+        padding: 20px;
+      }
+
+      button {
+        padding: 12px 20px;
+      }
+    }
+
+    /* Animasi loading */
+    .loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      border: 2px solid transparent;
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes spin {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }.overlay-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  display: none;
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: white;
+  font-size: 1.2rem;
+}
+
+.loader-content {
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.spinner {
+  border: 4px solid rgba(255,255,255,0.3);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 15px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="status"></div>
+    <div id="loader" class="overlay-loader">
+      <div class="loader-content">
+        <div class="spinner"></div>
+        <p>⏳ Mengirim, mohon tunggu...</p>
+      </div>
+    </div>
+    <!-- WhatsApp Section -->
+    <div class="form-section whatsapp-section row">
+      <!-- Kirim Teks -->
+      <div class="column">
+        <form id="formTeks">
+          <div class="form-group">
+            <label>Nomor HP:</label>
+            <input type="text" id="textNumber" placeholder="62812xxxxxx" required>
+          </div>
+          <div class="form-group">
+            <label>Pesan:</label>
+              <input type="text" id="textMessage" placeholder="Masukkan Pesan" required>
+          </div>
+          <button type="submit">Kirim Pesan WhatsApp</button>
+        </form>
+      </div>
+
+      <!-- Kirim File -->
+      <div class="column">
+        <form id="formFile" enctype="multipart/form-data">
+          <div class="form-group">
+          </div>
+          <div class="form-group">
+            <label>Pilih File (PDF):</label>
+            <div class="file-input-wrapper">
+              <input type="file" id="fileInput" accept="application/pdf" required>
+              <label for="fileInput" class="file-input-label">
+                📁 Klik untuk memilih file PDF
+              </label>
+            </div>
+          </div>
+          <button type="submit">Kirim File WhatsApp</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Email Section -->
+    <div class="form-section email-section">
+      <form id="formEmail" enctype="multipart/form-data">
+        <div class="row">
+          <div class="column">
+            <div class="form-group">
+              <label>Email Tujuan:</label>
+              <input type="email" id="email" placeholder="user@email.com" required>
+            </div>
+            <div class="form-group">
+              <label>Subject:</label>
+              <input type="text" id="subject" placeholder="Masukkan subject email" required>
+            </div>
+          </div>
+          <div class="column">
+            <div class="form-group">
+              <label>Isi Pesan:</label>
+              <textarea id="emailText" placeholder="Tulis isi pesan email..." required></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Upload File:</label>
+          <div class="file-input-wrapper">
+            <input type="file" id="emailFile" accept="application/pdf" required>
+            <label for="emailFile" class="file-input-label">
+              📁 Klik untuk memilih file PDF
+            </label>
+          </div>
+        </div>
+        <button type="submit">Kirim Email</button>
+      </form>
+    </div>
+
+  </div>
+  <script>      
+    const API_KEY = sessionStorage.getItem("apiKey");
+    if (!API_KEY) {
+      // ❌ Belum login, redirect ke login
+      window.location.href = "login.html";
+    }
+
+    //loading
+    function showLoader() {
+      document.getElementById('loader').style.display = 'block';
+      document.getElementById('status').innerText = '';
+    }
+
+    function hideLoader() {
+      document.getElementById('loader').style.display = 'none';
+    }
+
+    // Kirim Teks
+    document.getElementById('formTeks').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      showLoader();
+      
+      const number = document.getElementById('textNumber').value;
+      const message = document.getElementById('textMessage').value;
+      try {
+          const res = await fetch('/send-message', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': API_KEY
+            },
+            body: JSON.stringify({ number, message })
+          });
+
+          const data = await res.json();
+          document.getElementById('status').innerText = data.message;
+        } catch (err) {
+          document.getElementById('status').innerText = '❌ Gagal mengirim pesan.';
+        } finally {
+          hideLoader();
+        }
+      // const res = await fetch('/send-message', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     'x-api-key': API_KEY
+      //   },
+      //   body: JSON.stringify({ number, message })
+      // });
+
+      // const data = await res.json();
+      // document.getElementById('status').innerText = data.message;
+    });
+
+    // Kirim File WhatsApp
+    document.getElementById('formFile').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      showLoader();
+      
+      const number = document.getElementById('textNumber').value;
+      const file = document.getElementById('fileInput').files[0];
+      
+      const formData = new FormData();
+      formData.append('number', number);
+      formData.append('pdf', file);
+
+      try {
+        const res = await fetch('/upload-and-send', {
+          method: 'POST',
+          headers: { 'x-api-key': API_KEY },
+          body: formData
+        });
+
+        const data = await res.json();
+        document.getElementById('status').innerText = data.message;
+      } catch (err) {
+        document.getElementById('status').innerText = '❌ Gagal mengirim file.';
+      } finally {
+        hideLoader();
+      }
+
+      // const res = await fetch('/upload-and-send', {
+      //   method: 'POST',
+      //   headers: {
+      //     'x-api-key': API_KEY
+      //   },
+      //   body: formData
+      // });
+
+      // const data = await res.json();
+      // document.getElementById('status').innerText = data.message;
+    });
+
+    // Kirim Email
+    document.getElementById('formEmail').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      showLoader();
+      
+      const email = document.getElementById('email').value;
+      const subject = document.getElementById('subject').value;
+      const text = document.getElementById('emailText').value;
+      const file = document.getElementById('emailFile').files[0];
+
+      const formData = new FormData();
+      formData.append('email', email);
+      formData.append('subject', subject);
+      formData.append('text', text);
+      formData.append('pdf', file);
+      
+      try {
+        const res = await fetch('/upload-and-send-mail', {
+          method: 'POST',
+          headers: { 'x-api-key': API_KEY },
+          body: formData
+        });
+
+        const data = await res.json();
+        document.getElementById('status').innerText = data.message;
+      } catch (err) {
+        document.getElementById('status').innerText = '❌ Gagal kirim email.';
+      } finally {
+        hideLoader();
+      }
+      // const res = await fetch('/upload-and-send-mail', {
+      //   method: 'POST',
+      //   headers: {
+      //     'x-api-key': API_KEY
+      //   },
+      //   body: formData
+      // });
+
+      // const data = await res.json();
+      // document.getElementById('status').innerText = data.message;
+    });
+  </script>
+</body>
+</html>

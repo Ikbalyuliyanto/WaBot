@@ -1,9 +1,41 @@
-version: '3.8'
+version: "3.8"
 services:
-  whatsapp-bot:
-    build: .
+  webjs0:
+    build:
+      context: ./webjs0
+      args:
+        PORT: 3000
+    container_name: webjs0
     ports:
       - "3000:3000"
-    volumes:
-      - ./session_data:/root/.wwebjs_auth
-    restart: unless-stopped
+    restart: always
+    
+  webjs1:
+    build:
+      context: ./webjs1
+      args:
+        PORT: 3001
+    container_name: webjs1
+    ports:
+      - "3001:3001"
+    restart: always
+
+  webjs2:
+    build:
+      context: ./webjs2
+      args:
+        PORT: 3002
+    container_name: webjs2
+    ports:
+      - "3002:3002"
+    restart: always
+
+  webjs3:
+    build:
+      context: ./webjs3
+      args:
+        PORT: 3003
+    container_name: webjs3
+    ports:
+      - "3003:3003"
+    restart: always

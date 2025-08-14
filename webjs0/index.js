@@ -20,16 +20,16 @@ const handleMessage = require('./handlers/messageHandler');
 
 // Key 
 // Import API_KEY dari constants
-const { API_KEY } = require('./config/constants');
+// const { API_KEY } = require('./config/constants');
 
-// Middleware API Key
-app.use((req, res, next) => {
-  const clientKey = req.headers['x-api-key'];
-  if (!clientKey || clientKey !== API_KEY  || clientKey !== cachedToken ) {
-    return res.status(403).json({ message: '❌ API Key tidak valid.' });
-  }
-  next();
-});
+// // Middleware API Key
+// app.use((req, res, next) => {
+//   const clientKey = req.headers['x-api-key'];
+//   if (!clientKey || clientKey !== API_KEY  || clientKey !== cachedToken ) {
+//     return res.status(403).json({ message: '❌ API Key tidak valid.' });
+//   }
+//   next();
+// });
 
 // Modular route
 app.use('/', apiRoutes);
@@ -182,4 +182,4 @@ const PORT = 3000;
 server.listen(PORT, () => {
   console.log(`🚀 Server berjalan di http://localhost:${PORT}`);
   createClient();
-});
+});;

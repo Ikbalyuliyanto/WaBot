@@ -10,6 +10,54 @@ const upload = multer({ dest: 'uploads/' });
 
 // Ambil client dari parameter fungsi ekspor nanti
 let client;
+
+// Endpoint untuk login
+router.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Email dan password wajib diisi.' });
+    }
+
+    try {
+        // Cek konfigurasi lokal terlebih dahulu
+        const configPath = path.join(__dirname, '../config/config.json');
+        if (fs.existsSync(configPath)) {
+            const configData = fs.readFileSync(configPath, 'utf-8');
+            const config = JSON.parse(configData);
+
+            // Validasi login lokal
+            if (email === config.userapi && password === config.passwordapi) {
+                return res.json({
+                    message: '✅ Login berhasil dengan konfigurasi lokal.',
+                    method: 'local',
+                    token: config.apikey, // Anda bisa mengubahnya sesuai kebutuhan
+                });
+            }
+        }
+
+        // Jika login lokal gagal, coba login ke API eksternal
+        const response = await fetch("http://160.20.104.98/api/Auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+        });
+
+        if (!response.ok) {
+            return res.status(401).json({ message: 'Login gagal di API eksternal.' });
+        }
+
+        const apiData = await response.json();
+        return res.json({
+            message: '✅ Login berhasil melalui API eksternal.',
+            method: 'api',
+            token: apiData.token, // Menyimpan token dari API eksternal
+        });
+
+    } catch (err) {
+        console.error('❌ Gagal login:', err);
+        res.status(500).json({ message: 'Gagal melakukan login.', error: err.message });
+    }
+});
 // menampilkan semua chat
 // GET: Ambil semua pesan dari semua chat
 router.get('/messages', async (req, res) => {

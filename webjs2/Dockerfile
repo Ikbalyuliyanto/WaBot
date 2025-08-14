@@ -25,9 +25,16 @@ RUN apt update && apt install -y \
     apt clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
+
 COPY package*.json ./
 RUN npm install
+
 COPY . .
 
-EXPOSE 3000
+# Biarkan PORT bisa dikontrol dari luar (Docker Compose)
+ARG PORT=3002
+ENV PORT=$PORT
+
+EXPOSE $PORT
+
 CMD ["node", "index.js"]

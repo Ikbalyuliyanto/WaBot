@@ -629,6 +629,60 @@
         setInterval(createParticle, 800);
     </script>
     <script>
+
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const emailInput = this.querySelector('input[type="email"]').value.trim();
+        const passwordInput = this.querySelector('input[type="password"]').value;
+
+        const button = this.querySelector('.login-btn');
+        const loading = button.querySelector('.loading');
+        const btnText = button.querySelector('.btn-text');
+
+        loading.style.display = 'inline-block';
+        btnText.textContent = 'Signing In...';
+        button.disabled = true;
+
+        try {
+            // Kirim request login ke endpoint /login di backend dengan header x-api-key
+            const res = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: emailInput, password: passwordInput })
+            });
+
+            const data = await res.json();
+
+            if (data.token) {
+                // Jika login berhasil, simpan data ke sessionStorage
+                sessionStorage.setItem("userEmail", emailInput);
+                sessionStorage.setItem("apiKey", data.token); // Menyimpan token dari backend
+
+                btnText.textContent = 'Success!';
+                button.style.background = 'linear-gradient(45deg, #00b894, #00cec9)';
+                setTimeout(() => window.location.href = "page.html", 1000);
+            } else {
+                // Jika login gagal
+                throw new Error(data.message || "Login gagal");
+            }
+
+        } catch (err) {
+            console.error("❌ Gagal login:", err);
+            alert("Maaf login gagal. Periksa email/password!");
+            resetButton();
+        }
+
+        function resetButton() {
+            loading.style.display = 'none';
+            btnText.textContent = 'Sign In';
+            button.disabled = false;
+            button.style.background = 'linear-gradient(45deg, #4facfe, #00f2fe)';
+        }
+    });
+</script>
+
+    <!-- <script>
         const API_KEY = 'kynd_X2n91cA38Dz73k5Mf81aZLq8Ld_f9083da98dfd092a8c5';
 
         document.getElementById('loginForm').addEventListener('submit', async function (e) {
@@ -693,7 +747,7 @@
             button.style.background = 'linear-gradient(45deg, #4facfe, #00f2fe)';
             }
         });
-    </script>
+    </script> -->
 
 </body>
 </html>
