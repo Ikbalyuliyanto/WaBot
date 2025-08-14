@@ -1,47 +1,3 @@
-# name: WabotAutoDeploy
-
-# on:
-#   push:
-#     branches:
-#       - main # Trigger saat push ke branch main
-
-# jobs:
-#   deploy:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#     - name: Checkout Repository
-#       uses: actions/checkout@v4
-
-#     - name: Setup SSH Connection
-#       run: |
-#         mkdir -p ~/.ssh
-#         echo "${{ secrets.SSH_PRIVATE_KEY_BACKEND }}" > ~/.ssh/id_rsa
-#         chmod 600 ~/.ssh/id_rsa
-#         ssh-keyscan -H ${{ secrets.SSH_IP_BACKEND }} >> ~/.ssh/known_hosts
-
-#     - name: Deploy to Server via Docker Compose
-#       run: |
-#         ssh ${{ secrets.SSH_USER_BACKEND }}@${{ secrets.SSH_IP_BACKEND }} << 'EOF'
-#           echo "📂 Masuk ke direktori WaBot..."
-#           cd /home/ecustomer/WaBot
-
-#           echo "♻️ Reset perubahan lokal..."
-#           git reset --hard origin/main
-#           git clean -fd
-#           git pull origin main
-
-#           echo "🐳 Rebuild semua webjs..."
-#           docker-compose down
-#           docker-compose up -d --build
-
-#           echo "🧹 Membersihkan image yang tidak terpakai..."
-#           docker system prune -af
-
-#           DEPLOY_TIME=$(date +"%A, %d-%m-%Y %H:%M:%S")
-#           echo "✅ Deployment selesai pada $DEPLOY_TIME"
-#         EOF
-
 name: WabotAutoDeploy
 
 on:
@@ -88,3 +44,47 @@ jobs:
           DEPLOY_TIME=$(date +"%A, %d-%m-%Y %H:%M:%S")
           echo "✅ Deployment selesai pada $DEPLOY_TIME"
         EOF
+
+        # name: WabotAutoDeploy
+
+# on:
+#   push:
+#     branches:
+#       - main # Trigger saat push ke branch main
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#     - name: Checkout Repository
+#       uses: actions/checkout@v4
+
+#     - name: Setup SSH Connection
+#       run: |
+#         mkdir -p ~/.ssh
+#         echo "${{ secrets.SSH_PRIVATE_KEY_BACKEND }}" > ~/.ssh/id_rsa
+#         chmod 600 ~/.ssh/id_rsa
+#         ssh-keyscan -H ${{ secrets.SSH_IP_BACKEND }} >> ~/.ssh/known_hosts
+
+#     - name: Deploy to Server via Docker Compose
+#       run: |
+#         ssh ${{ secrets.SSH_USER_BACKEND }}@${{ secrets.SSH_IP_BACKEND }} << 'EOF'
+#           echo "📂 Masuk ke direktori WaBot..."
+#           cd /home/ecustomer/WaBot
+
+#           echo "♻️ Reset perubahan lokal..."
+#           git reset --hard origin/main
+#           git clean -fd
+#           git pull origin main
+
+#           echo "🐳 Rebuild semua webjs..."
+#           docker-compose down
+#           docker-compose up -d --build
+
+#           echo "🧹 Membersihkan image yang tidak terpakai..."
+#           docker system prune -af
+
+#           DEPLOY_TIME=$(date +"%A, %d-%m-%Y %H:%M:%S")
+#           echo "✅ Deployment selesai pada $DEPLOY_TIME"
+#         EOF
