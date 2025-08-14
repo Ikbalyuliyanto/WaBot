@@ -63,7 +63,7 @@ function createClient() {
     }
   });
 
-  // setClient(client); // Kirim ke routes/apiRoutes
+  setClient(client); // Kirim ke routes/apiRoutes
   registerClientEvents();
   safeInitialize();
 }
