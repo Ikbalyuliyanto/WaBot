@@ -39,3 +39,13 @@ services:
     ports:
       - "3003:3003"
     restart: always
+  
+  webjs4:
+    build:
+      context: ./webjs4
+      args:
+        PORT: 3003
+    container_name: webjs4
+    ports:
+      - "3030:3030"
+    restart: always

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pengaturan API</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .main-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      height: calc(100vh - 40px);
+    }
+
+    .left-panel, .right-panel {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      padding: 25px 30px;
+      text-align: center;
+    }
+
+    .panel-header h2 {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .panel-header p {
+      opacity: 0.9;
+      font-size: 0.95rem;
+    }
+
+    .panel-content {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #374151;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      background: #f9fafb;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      background: white;
+      transform: translateY(-1px);
+    }
+
+    .form-group input:hover {
+      border-color: #d1d5db;
+    }
+
+    .required {
+      color: #ef4444;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      border: none;
+      padding: 14px 30px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(79, 70, 229, 0.3);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .data-item {
+      background: #f8fafc;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      border-left: 4px solid #4f46e5;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .data-item strong {
+      color: #4f46e5;
+      display: block;
+      margin-bottom: 5px;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .data-item span {
+      color: #374151;
+      word-break: break-all;
+      font-size: 0.9rem;
+    }
+
+    .header-data pre {
+      background: #1f2937;
+      color: #d1d5db;
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.8rem;
+      margin-top: 8px;
+    }
+
+    .no-data {
+      text-align: center;
+      color: #6b7280;
+      font-style: italic;
+      padding: 40px 20px;
+      background: #f8fafc;
+      border-radius: 10px;
+      border: 2px dashed #d1d5db;
+    }
+
+    .icon {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .spinner {
+      border: 3px solid #f3f4f6;
+      border-top: 3px solid #4f46e5;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 1024px) {
+      .main-container {
+        grid-template-columns: 1fr;
+        height: auto;
+        gap: 20px;
+      }
+      
+      body {
+        padding: 10px;
+      }
+      
+      .panel-header {
+        padding: 20px;
+      }
+      
+      .panel-content {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- LEFT PANEL - FORM INPUT -->
+    <div class="left-panel">
+      <div class="panel-header">
+        <h2>
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M12 2L2 7v10c0 5.55 3.84 10 9 10s9-4.45 9-10V7l-8-5z"/>
+          </svg>
+          Pengaturan API
+        </h2>
+        <p>Konfigurasi pengaturan API dan email sistem</p>
+      </div>
+
+      <div class="panel-content">
+        <form id="configForm">
+          <div class="form-group">
+            <label for="userapi">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+              User API
+            </label>
+            <input type="email" id="userapi" placeholder="user@example.com" />
+          </div>
+
+          <div class="form-group">
+            <label for="passwordapi">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M18,8h-1V6c0-2.76-2.24-5-5-5S7,3.24,7,6v2H6c-1.1,0-2,0.9-2,2v10c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2V10C20,8.9,19.1,8,18,8z M12,17c-1.1,0-2-0.9-2-2s0.9-2,2-2s2,0.9,2,2S13.1,17,12,17z M15.1,8H8.9V6c0-1.71,1.39-3.1,3.1-3.1s3.1,1.39,3.1,3.1V8z"/>
+              </svg>
+              Password API
+            </label>
+            <input type="password" id="passwordapi" placeholder="••••••••••" />
+          </div>
+
+          <div class="form-group">
+            <label for="apiname">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M9,12l2,2l4-4m6,2A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12Z"/>
+              </svg>
+              API Name
+            </label>
+            <input type="text" id="apiname" placeholder="Nama API Anda" />
+          </div>
+
+          <div class="form-group">
+            <label for="apikey">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M7,14A2,2 0 0,1 5,12A2,2 0 0,1 7,10A2,2 0 0,1 9,12A2,2 0 0,1 7,14M12.65,10C11.83,7.67 9.61,6 7,6A6,6 0 0,0 1,12A6,6 0 0,0 7,18C9.61,18 11.83,16.33 12.65,14H17V18H21V14H23V10H12.65Z"/>
+              </svg>
+              API Key <span class="required">*</span>
+            </label>
+            <input type="text" id="apikey" required placeholder="Masukkan API Key" />
+          </div>
+
+          <div class="form-group">
+            <label for="useremail">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z"/>
+              </svg>
+              User Email
+            </label>
+            <input type="email" id="useremail" placeholder="email@example.com" />
+          </div>
+
+          <div class="form-group">
+            <label for="passwordemail">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M18,8h-1V6c0-2.76-2.24-5-5-5S7,3.24,7,6v2H6c-1.1,0-2,0.9-2,2v10c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2V10C20,8.9,19.1,8,18,8z M12,17c-1.1,0-2-0.9-2-2s0.9-2,2-2s2,0.9,2,2S13.1,17,12,17z M15.1,8H8.9V6c0-1.71,1.39-3.1,3.1-3.1s3.1,1.39,3.1,3.1V8z"/>
+              </svg>
+              Password Email
+            </label>
+            <input type="password" id="passwordemail" placeholder="••••••••••" />
+          </div>
+
+          <button type="submit" class="submit-btn">
+            <svg class="icon" viewBox="0 0 24 24">
+              <path d="M17,9H7V7H17M17,13H7V11H17M14,17H7V15H14M12,3A1,1 0 0,1 13,4A1,1 0 0,1 12,5A1,1 0 0,1 11,4A1,1 0 0,1 12,3M19,3H14.82C14.4,2.44 13.3,2 12.5,2C11.7,2 10.6,2.44 10.18,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3Z"/>
+            </svg>
+            Simpan Konfigurasi
+          </button>
+        </form>
+
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+          <p>Menyimpan konfigurasi...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL - DATA TERSIMPAN -->
+    <div class="right-panel">
+      <div class="panel-header">
+        <h2>
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z"/>
+          </svg>
+          Data Tersimpan
+        </h2>
+        <p>Konfigurasi yang telah disimpan dalam sistem</p>
+      </div>
+
+      <div class="panel-content">
+        <div id="savedData"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>    
+    const API_KEY = sessionStorage.getItem("apiKey");
+    if (!API_KEY) {
+      // ❌ Belum login, redirect ke login
+      window.location.href = "login.html";
+    }
+
+    const form = document.getElementById('configForm');
+    const savedDataDiv = document.getElementById('savedData');
+    const loadingDiv = document.getElementById('loading');
+
+    // Isi default API Key
+    document.getElementById('apikey').value = API_KEY;
+
+    // 🔄 Ambil konfigurasi lama
+    fetch('/config', {
+      headers: { 'x-api-key': API_KEY }
+    })
+      .then(res => res.json())
+      .then(data => {
+      if (data.userapi || data.useremail) showData(data);
+      })
+      .catch(() => {
+        savedDataDiv.innerHTML = '<p>Belum ada data .</p>';
+      });
+
+      // Tampilkan placeholder saat belum ada data
+      savedDataDiv.innerHTML = '<div class="no-data">Belum ada data tersimpan.</div>';
+
+    // Submit form
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const data = {
+        userapi: document.getElementById('userapi').value,
+        passwordapi: document.getElementById('passwordapi').value,
+        useremail: document.getElementById('useremail').value,
+        passwordemail: document.getElementById('passwordemail').value,
+        apiname: document.getElementById('apiname').value,
+        apikey: API_KEY,
+        header: {
+          apiname: API_KEY
+        }
+      };
+
+      const res = await fetch('/config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': API_KEY
+        },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+      alert(result.message || '✅ Disimpan!');
+      showData(data);
+    });
+
+    // Tampilkan data tersimpan
+    function showData(data) {
+      if (!data.userapi && !data.useremail) {
+        savedDataDiv.innerHTML = '<div class="no-data">Belum ada data tersimpan.</div>';
+        return;
+      }
+
+      savedDataDiv.innerHTML = `
+        <div class="data-item">
+          <strong>
+            <svg class="icon" viewBox="0 0 24 24">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+            User API
+          </strong>
+          <span>${data.userapi || '-'}</span>
+        </div>
+        <div class="data-item">
+          <strong>
+            <svg class="icon" viewBox="0 0 24 24">
+              <path d="M18,8h-1V6c0-2.76-2.24-5-5-5S7,3.24,7,6v2H6c-1.1,0-2,0.9-2,2v10c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2V10C20,8.9,19.1,8,18,8z M12,17c-1.1,0-2-0.9-2-2s0.9-2,2-2s2,0.9,2,2S13.1,17,12,17z M15.1,8H8.9V6c0-1.71,1.39-3.1,3.1-3.1s3.1,1.39,3.1,3.1V8z"/>
+            </svg>
+            Password API
+          </strong>
+          <span>${data.passwordapi ? '••••••••••' : '-'}</span>
+        </div>
+        <div class="data-item">
+          <strong>
+            <svg class="icon" viewBox="0 0 24 24">
+              <path d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z"/>
+            </svg>
+            User Email
+          </strong>
+          <span>${data.useremail || '-'}</span>
+        </div>
+        <div class="data-item">
+          <strong>
+            <svg class="icon" viewBox="0 0 24 24">
+              <path d="M18,8h-1V6c0-2.76-2.24-5-5-5S7,3.24,7,6v2H6c-1.1,0-2,0.9-2,2v10c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2V10C20,8.9,19.1,8,18,8z M12,17c-1.1,0-2-0.9-2-2s0.9-2,2-2s2,0.9,2,2S13.1,17,12,17z M15.1,8H8.9V6c0-1.71,1.39-3.1,3.1-3.1s3.1,1.39,3.1,3.1V8z"/>
+            </svg>
+            Password Email
+          </strong>
+          <span>${data.passwordemail ? '••••••••••' : '-'}</span>
+        </div>
+        <div class="data-item">
+          <strong>
+            <svg class="icon" viewBox="0 0 24 24">
+              <path d="M9,12l2,2l4-4m6,2A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12Z"/>
+            </svg>
+            API Name
+          </strong>
+          <span>${data.apiname || '-'}</span>
+        </div>
+        <div class="data-item">
+          <strong>
+            <svg class="icon" viewBox="0 0 24 24">
+              <path d="M7,14A2,2 0 0,1 5,12A2,2 0 0,1 7,10A2,2 0 0,1 9,12A2,2 0 0,1 7,14M12.65,10C11.83,7.67 9.61,6 7,6A6,6 0 0,0 1,12A6,6 0 0,0 7,18C9.61,18 11.83,16.33 12.65,14H17V18H21V14H23V10H12.65Z"/>
+            </svg>
+            API Key
+          </strong>
+          <span>${data.apikey ? `${data.apikey.substring(0, 30)}...` : '-'}</span>
+        </div>
+        <div class="data-item">
+          <strong>
+            <svg class="icon" viewBox="0 0 24 24">
+              <path d="M12,2A2,2 0 0,1 14,4C14,4.74 13.6,5.39 13,5.73V7H14A7,7 0 0,1 21,14H22A1,1 0 0,1 23,15V18A1,1 0 0,1 22,19H21V20A2,2 0 0,1 19,22H5A2,2 0 0,1 3,20V19H2A1,1 0 0,1 1,18V15A1,1 0 0,1 2,14H3A7,7 0 0,1 10,7H11V5.73C10.4,5.39 10,4.74 10,4A2,2 0 0,1 12,2M7.5,13A0.5,0.5 0 0,0 7,13.5A0.5,0.5 0 0,0 7.5,14A0.5,0.5 0 0,0 8,13.5A0.5,0.5 0 0,0 7.5,13M16.5,13A0.5,0.5 0 0,0 16,13.5A0.5,0.5 0 0,0 16.5,14A0.5,0.5 0 0,0 17,13.5A0.5,0.5 0 0,0 16.5,13Z"/>
+            </svg>
+            Header Configuration
+          </strong>
+          <pre>${JSON.stringify(data.header, null, 2)}</pre>
+        </div>
+      `;
+
+      // Isi form dengan data tersimpan
+      document.getElementById('userapi').value = data.userapi || '';
+      document.getElementById('passwordapi').value = data.passwordapi || '';
+      document.getElementById('useremail').value = data.useremail || '';
+      document.getElementById('passwordemail').value = data.passwordemail || '';
+      document.getElementById('apiname').value = data.apiname || '';
+      document.getElementById('apikey').value = data.apikey || '';
+    }
+
+    // Add input animations
+    document.querySelectorAll('input').forEach(input => {
+      input.addEventListener('focus', function() {
+        this.parentElement.style.transform = 'scale(1.02)';
+      });
+      
+      input.addEventListener('blur', function() {
+        this.parentElement.style.transform = 'scale(1)';
+      });
+    });
+  </script>
+</body>
+</html>
