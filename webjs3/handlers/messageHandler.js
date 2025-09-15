@@ -5,7 +5,7 @@ const pendingQueue = []; // Antrian pesan menunggu balasan AI
 // Kirim pesan ke AI
 async function relayToPerplex(client, sender, messageBody, withInstruction = true) {
     const prefix = withInstruction
-        ? "Kamu adalah Seseorang. Tanggapi semua pesan seolah-olah kamu adalah Seseorang dan siap membantu pasien. "
+        ? ""
         : "";
     const textToSend = prefix + messageBody;
 
