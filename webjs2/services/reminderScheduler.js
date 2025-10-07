@@ -28,10 +28,18 @@ function checkPrayerTime(client, sentFlags) {
   const now = new Date();
   const currentTime = now.toTimeString().slice(0, 5);
 
+  console.log(`🕒 Sekarang jam: ${currentTime}`);
+  console.log(`📋 Jadwal sholat:`, prayerTimes);
+
   Object.entries(prayerTimes).forEach(([name, time]) => {
+    console.log(`⏳ Cek ${name}: ${currentTime} === ${time} ?`);
+
     if (currentTime === time && !sentFlags[name]) {
       const capitalized = name.charAt(0).toUpperCase() + name.slice(1);
       const message = `Kak sama Buk Waktunya sholat ${capitalized}. Di Foto ke grup jangan lupa.`;
+
+      console.log(`✅ Mengirim pesan sholat ${name} ke grup.`);
+
       sendToAllGroups(client, message);
       sentFlags[name] = true;
 
@@ -43,6 +51,7 @@ function checkPrayerTime(client, sentFlags) {
     }
   });
 }
+
 
 // Mulai pantau apakah "Buk" dan "Kak" mengirim foto
 function startPhotoWatch(client, prayerName) {
