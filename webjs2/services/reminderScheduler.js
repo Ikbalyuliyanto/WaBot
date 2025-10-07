@@ -28,8 +28,8 @@ function checkPrayerTime(client, sentFlags) {
   const now = new Date();
   const currentTime = now.toTimeString().slice(0, 5);
 
-  console.log(`🕒 Sekarang jam: ${currentTime}`);
-  console.log(`📋 Jadwal sholat:`, prayerTimes);
+  console.log('🕒 Sekarang waktu lokal:', new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }));
+  console.log('🕒 Sekarang waktu default:', new Date().toString());
 
   Object.entries(prayerTimes).forEach(([name, time]) => {
     console.log(`⏳ Cek ${name}: ${currentTime} === ${time} ?`);

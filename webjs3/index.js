@@ -17,7 +17,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Import modular
 const { router: apiRoutes, setClient } = require('./routes/apiRoutes');
 const handleMessage = require('./handlers/messageHandler');
-const { startSchedule } = require('./services/reminderScheduler');
 
 
 // Key 
