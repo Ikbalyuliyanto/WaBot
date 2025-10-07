@@ -16,6 +16,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Import modular
 const { router: apiRoutes, setClient } = require('./routes/apiRoutes');
+const { startSchedule } = require('./services/reminderScheduler');
 // const handleMessage = require('./handlers/messageHandler');
 
 // Key 
@@ -116,6 +117,13 @@ function registerClientEvents() {
   client.on('ready', () => {
     console.log('✅ Client WA siap!');
     io.emit('ready', 'Client is ready');
+    // 🕌 Mulai pengingat sholat setelah client siap
+    startSchedule(client);
+
+    //  // Test pengiriman pesan 10 detik setelah client siap
+    // schedule.scheduleJob(new Date(Date.now() + 10000), () => {
+    //   sendToAll(client, 'Test pengingat sholat setelah 10 detik');
+    // });
   });
 
   client.on('authenticated', () => {
