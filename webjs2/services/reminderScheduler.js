@@ -89,8 +89,8 @@ function handleIncomingMessage(msg) {
 // Jadwal sholat (manual)
 const prayerTimes = {
   subuh: '05:30',
-  dzuhur: '10:42',
-  ashar: '10:43',
+  dzuhur: '12:22',
+  ashar: '15:33',
   maghrib: '18:09',
   isya: '19:02'
 };
