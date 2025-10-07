@@ -26,19 +26,12 @@ function sendToAllGroups(client, message) {
 // Fungsi cek waktu sholat
 function checkPrayerTime(client, sentFlags) {
   const now = new Date();
-  const currentTime = now.toTimeString().slice(0, 5);
-
-  console.log('🕒 Sekarang waktu lokal:', new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }));
-  console.log('🕒 Sekarang waktu default:', new Date().toString());
+  const currentTime = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' });
 
   Object.entries(prayerTimes).forEach(([name, time]) => {
-    console.log(`⏳ Cek ${name}: ${currentTime} === ${time} ?`);
-
     if (currentTime === time && !sentFlags[name]) {
       const capitalized = name.charAt(0).toUpperCase() + name.slice(1);
       const message = `Kak sama Buk Waktunya sholat ${capitalized}. Di Foto ke grup jangan lupa.`;
-
-      console.log(`✅ Mengirim pesan sholat ${name} ke grup.`);
 
       sendToAllGroups(client, message);
       sentFlags[name] = true;
