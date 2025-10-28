@@ -6,7 +6,7 @@ async function handlePoliInfo(keyword, chatId, client, session) {
         const token = await loginAndGetToken();
         console.log('✅ Token berhasil diambil untuk POLI');
 
-        const response = await axios.get('http://160.20.104.98/api/Poliklinik/paged', {
+        const response = await axios.get('http://103.153.60.136/api/Poliklinik/paged', {
             headers: {
                 Authorization: `Bearer ${token}`
             },

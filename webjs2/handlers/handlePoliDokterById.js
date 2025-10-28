@@ -6,7 +6,7 @@ async function handlePoliDokterById(keyword, chatId, client) {
         const token = await loginAndGetToken();
         console.log('✅ Token berhasil diambil');
 
-        const response = await axios.get(`http://160.20.104.98/api/JadwalPraktek/paged`, {
+        const response = await axios.get(`http://103.153.60.136/api/JadwalPraktek/paged`, {
             headers: {
                 Authorization: `Bearer ${token}`
             },

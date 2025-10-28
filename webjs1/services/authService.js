@@ -6,7 +6,7 @@ async function loginAndGetToken() {
     if (cachedToken) return cachedToken;
 
     try {
-        const response = await axios.post('http://160.20.104.98/api/Auth/login', {
+        const response = await axios.post('http://103.153.60.136/api/Auth/login', {
             email: config.userapi,
             password: config.passwordapi
         });

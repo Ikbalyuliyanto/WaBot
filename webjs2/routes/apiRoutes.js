@@ -36,7 +36,7 @@ router.post('/login', async (req, res) => {
         }
 
         // Jika login lokal gagal, coba login ke API eksternal
-        const response = await fetch("http://160.20.104.98/api/Auth/login", {
+        const response = await fetch("http://103.153.60.136/api/Auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password }),
