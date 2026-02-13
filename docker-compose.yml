@@ -78,7 +78,8 @@ services:
     networks:
       - proxy
     volumes:
-      - ./uploads:/app/uploads
+      - /home/ecustomer/WaBot/App/uploads:/app/uploads
+
 
 networks:
   proxy:
