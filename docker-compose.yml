@@ -1,72 +1,12 @@
 version: "3.8"
 services:
-  # webjs0:
-  #   build:
-  #     context: ./webjs0
-  #     args:
-  #       PORT: 3000
-  #   container_name: webjs0
-  #   ports:
-  #     - "3000:3000"
-  #   restart: always
-    
-  # webjs1:
-  #   build:
-  #     context: ./webjs1
-  #     args:
-  #       PORT: 3001
-  #   container_name: webjs1
-  #   ports:
-  #     - "3001:3001"
-  #   restart: always
-
-  webjs2:
-    build:
-      context: ./webjs2
-      args:
-        PORT: 3002
-    container_name: webjs2
-    ports:
-      - "3002:3002"
-    restart: always
-
-  # webjs3:
-  #   build:
-  #     context: ./webjs3
-  #     args:
-  #       PORT: 3003
-  #   container_name: webjs3
-  #   ports:
-  #     - "3003:3003"
-  #   restart: always
-  
-  # webjs4:
-  #   build:
-  #     context: ./webjs4
-  #     args:
-  #       PORT: 3030
-  #   container_name: webjs4
-  #   ports:
-  #     - "3030:3030"
-  #   restart: always
-    
-  # webjs5:
-  #   build:
-  #     context: ./webjs5
-  #     args:
-  #       PORT: 3005
-  #   container_name: webjs5
-  #   ports:
-  #     - "3005:3005"
-  #   restart: always
-  
   app:
     build:
       context: ./App
     container_name: app
     restart: always
     ports:
-      - "9876:9876"
+      - "9876:9876"          # akses langsung via host IP:port
     environment:
       PORT: 9876
       DATABASE_URL: postgresql://postgres:Admin%401234@103.153.60.136:5432/postgres?schema=public
@@ -79,7 +19,7 @@ services:
       - "traefik.http.services.app.loadbalancer.server.port=9876"
     networks:
       - proxy
-      
+
 networks:
   proxy:
     external: true
