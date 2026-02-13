@@ -64,10 +64,12 @@ services:
       context: ./App
     container_name: app
     restart: always
-    expose:
-      - "9876"
-    env_file:
-      - ./App/app/.env
+    ports:
+      - "9876:9876"
+    environment:
+      PORT: 9876
+      DATABASE_URL: postgresql://postgres:Admin%401234@103.153.60.136:5432/postgres?schema=public
+      JWT_SECRET: isi_secret_panjang
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.app.rule=Host(`ashanum.com`)"
