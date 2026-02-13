@@ -2,120 +2,76 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
-const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
 
+// ===== INIT SERVER =====
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = socketIo(server, {
+  cors: {
+    origin: '*'
+  }
+});
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Import modular
+// ===== ROUTES & HANDLER =====
 const { router: apiRoutes, setClient } = require('./routes/apiRoutes');
 const handleMessage = require('./handlers/messageHandler');
 
-// Key 
-// Import API_KEY dari constants
-// const { API_KEY } = require('./config/constants');
-
-// // Middleware API Key
-// app.use((req, res, next) => {
-//   const clientKey = req.headers['x-api-key'];
-//   if (!clientKey || clientKey !== API_KEY  || clientKey !== cachedToken ) {
-//     return res.status(403).json({ message: '❌ API Key tidak valid.' });
-//   }
-//   next();
-// });
-
-// Modular route
 app.use('/', apiRoutes);
-// Key End
 
-const SESSION_PATH = './.wwebjs_auth';
+// ===== WHATSAPP CONFIG =====
 let client = null;
 let isInitializing = false;
 
-// Membuat ulang client WhatsApp
+// ===== CREATE CLIENT (SATU KALI) =====
 function createClient() {
-  console.log("✨ Membuat client baru...");
+  if (client) return;
+
+  console.log('✨ Membuat client WhatsApp...');
+
   client = new Client({
     authStrategy: new LocalAuth({
-      clientId: 'default',
-      dataPath: SESSION_PATH
+      clientId: 'wa-main' // stabil & konsisten
     }),
     puppeteer: {
       headless: true,
       args: [
         '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-zygote',
-        '--single-process',
-        '--no-first-run',
-        '--no-default-browser-check',
-        '--disable-gpu'
+        '--disable-setuid-sandbox'
       ]
     }
   });
 
-  setClient(client); // Kirim ke routes/apiRoutes
+  setClient(client);
   registerClientEvents();
   safeInitialize();
 }
 
-// Inisialisasi aman
+// ===== SAFE INITIALIZE =====
 async function safeInitialize() {
-  if (isInitializing) return;
+  if (isInitializing || !client) return;
+
   isInitializing = true;
   try {
     await client.initialize();
     console.log('✅ WA Client berhasil diinisialisasi');
   } catch (err) {
-    console.error('❌ Gagal initialize client:', err.message);
+    console.error('❌ Gagal initialize:', err.message);
   } finally {
     isInitializing = false;
   }
 }
 
-// Hapus session + reset browser
-async function forceCleanRestart() {
-  try {
-    if (client) {
-      await client.destroy();
-      client = null;
-      console.log('🧹 Client destroyed');
-    }
-
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    const sessionDir = path.join(SESSION_PATH, 'session', 'Default');
-    if (fs.existsSync(sessionDir)) {
-      fs.rmSync(sessionDir, { recursive: true, force: true });
-      console.log('🗑️ Session folder berhasil dihapus');
-    }
-  } catch (err) {
-    console.error('❌ Gagal saat force reset:', err.message);
-  }
-
-  console.log('🔁 Membuat ulang client...');
-  setTimeout(() => createClient(), 1000);
-}
-
-// Event WA Client
+// ===== REGISTER EVENTS =====
 function registerClientEvents() {
   client.on('qr', (qr) => {
     console.log('📲 QR Code tersedia');
     io.emit('qr', qr);
-    io.emit('message', '📱 Silakan scan QR!');
-  });
-
-  client.on('ready', () => {
-    console.log('✅ Client WA siap!');
-    io.emit('ready', 'Client is ready');
   });
 
   client.on('authenticated', () => {
@@ -123,63 +79,76 @@ function registerClientEvents() {
     io.emit('message', '🔐 Autentikasi berhasil');
   });
 
-  client.on('auth_failure', () => {
-    console.error('❌ Autentikasi gagal');
-    io.emit('message', '❌ Autentikasi gagal, reset...');
-    forceCleanRestart();
+  client.on('ready', () => {
+    console.log('✅ Client WA siap!');
+    io.emit('ready', 'Client ready');
   });
 
-  client.on('disconnected', async (reason) => {
-    console.warn('⚠️ Terputus dari WhatsApp:', reason);
-    io.emit('message', '❌ Terputus, reset ulang...');
-    await forceCleanRestart();
+  client.on('auth_failure', (msg) => {
+    console.error('❌ Auth failure:', msg);
+    io.emit('message', '❌ Autentikasi gagal, scan ulang QR');
+  });
+
+  client.on('disconnected', (reason) => {
+    console.warn('⚠️ WA disconnected:', reason);
+
+    if (reason === 'LOGOUT') {
+      // ❌ JANGAN auto recreate
+      io.emit('message', '❌ WhatsApp logout. Silakan scan QR ulang.');
+      client = null;
+      return;
+    }
+
+    // reconnect HALUS
+    setTimeout(() => {
+      console.log('🔁 Re-initialize client...');
+      safeInitialize();
+    }, 5000);
   });
 
   client.on('message', async (msg) => {
     try {
       await handleMessage(client, msg);
     } catch (err) {
-      console.error('❌ Error saat handle pesan:', err.message);
+      console.error('❌ Error handle message:', err.message);
     }
   });
 }
 
-// Socket frontend (Web UI)
+// ===== SOCKET FRONTEND =====
 io.on('connection', (socket) => {
-  console.log('🧠 Frontend terhubung ke Socket.io');
-  socket.emit('message', '👋 Silakan scan QR jika belum login');
+  console.log('🧠 Frontend terhubung');
 
-  if (client && client.info && client.info.wid) {
-    socket.emit('ready', 'Client is ready');
+  socket.emit('message', '👋 Selamat datang');
+
+  if (client && client.info?.wid) {
+    socket.emit('ready', 'Client ready');
   }
 
   socket.on('logout', async () => {
+    if (!client) return;
+
     console.log('🔴 Logout diminta dari frontend');
     try {
       await client.logout();
       await client.destroy();
       client = null;
 
+      io.emit('message', '🔴 Logout berhasil, scan QR ulang');
+
       setTimeout(() => {
-        const sessionPath = path.join(SESSION_PATH, 'session', 'Default');
-        try {
-          fs.rmSync(sessionPath, { recursive: true, force: true });
-          console.log('🗑️ Session lama dihapus');
-        } catch (err) {
-          console.warn('⚠️ Gagal hapus session:', err.message);
-        }
         createClient();
-      }, 1000);
+      }, 3000);
+
     } catch (err) {
-      console.error('❌ Gagal saat logout:', err.message);
-      socket.emit('message', '❌ Logout gagal');
+      console.error('❌ Logout error:', err.message);
     }
   });
 });
 
-// Start server
+// ===== START SERVER =====
 const PORT = 3005;
 server.listen(PORT, () => {
   console.log(`🚀 Server berjalan di http://localhost:${PORT}`);
   createClient();
-});;
+});

@@ -126,13 +126,13 @@ function registerClientEvents() {
   client.on('auth_failure', () => {
     console.error('❌ Autentikasi gagal');
     io.emit('message', '❌ Autentikasi gagal, reset...');
-    forceCleanRestart();
+    // forceCleanRestart();
   });
 
   client.on('disconnected', async (reason) => {
     console.warn('⚠️ Terputus dari WhatsApp:', reason);
     io.emit('message', '❌ Terputus, reset ulang...');
-    await forceCleanRestart();
+    // await forceCleanRestart();
   });
 
   // client.on('message', async (msg) => {

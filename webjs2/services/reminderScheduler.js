@@ -1,7 +1,10 @@
-// services/reminderScheduler.js
+const axios = require('axios');
+
+const KOTA_ID = 1203; // Kab. Bekasi (Cikarang)
+const TIMEZONE = 'Asia/Jakarta';
 
 const groupTargets = [
-  '120363403796776086@g.us'  // ID grup
+  '120363403796776086@g.us'
 ];
 
 const watchUsers = {
@@ -9,113 +12,195 @@ const watchUsers = {
   '6285179845620@c.us': 'Kak'
 };
 
-// Waktu-waktu yang wajib kirim foto
 const photoRequiredTimes = ['subuh', 'maghrib', 'isya'];
+let photoCheckStatus = {};
+let prayerTimes = {};
+let prayerOrder = [];
 
-// Untuk melacak status kirim foto
-let photoCheckStatus = {}; // Akan berisi: { subuh: { Buk: false, Kak: false, timer: ... } }
-
-function sendToAllGroups(client, message) {
-  for (const groupId of groupTargets) {
-    client.sendMessage(groupId, message)
-      .then(() => console.log(`✅ Pesan dikirim ke grup ${groupId}`))
-      .catch(err => console.error(`❌ Gagal kirim ke grup ${groupId}:`, err.message));
+/* =========================
+   HELPER KIRIM PESAN + SEEN
+========================= */
+async function sendMessageWithSeen(client, chatId, message) {
+  try {
+    const chat = await client.getChatById(chatId);
+    await chat.sendSeen(); // kirim tanda dibaca
+    await client.sendMessage(chatId, message);
+  } catch (err) {
+    console.error('❌ Gagal kirim pesan:', err);
   }
 }
 
-// Fungsi cek waktu sholat
-function checkPrayerTime(client, sentFlags) {
+/* =========================
+   AMBIL JADWAL SHOLAT
+========================= */
+async function fetchPrayerTimes() {
   const now = new Date();
-  const currentTime = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' });
+  const y = now.getFullYear();
+  const m = now.getMonth() + 1;
+  const d = now.getDate();
 
-  Object.entries(prayerTimes).forEach(([name, time]) => {
-    if (currentTime === time && !sentFlags[name]) {
-      const capitalized = name.charAt(0).toUpperCase() + name.slice(1);
-      const message = `Kak sama Buk Waktunya sholat ${capitalized}. Di Foto ke grup jangan lupa.`;
+  const url = `https://api.myquran.com/v1/sholat/jadwal/${KOTA_ID}/${y}/${m}/${d}`;
+  const res = await axios.get(url);
+  const jadwal = res.data.data.jadwal;
 
-      sendToAllGroups(client, message);
+  prayerTimes = {
+    subuh: jadwal.subuh,
+    dzuhur: jadwal.dzuhur,
+    ashar: jadwal.ashar,
+    maghrib: jadwal.maghrib,
+    isya: jadwal.isya
+  };
+
+  prayerOrder = Object.keys(prayerTimes);
+  console.log('🕋 Jadwal sholat hari ini:', prayerTimes);
+}
+
+/* =========================
+   UTIL
+========================= */
+function sendToAllGroups(client, message) {
+  groupTargets.forEach(id => {
+    sendMessageWithSeen(client, id, message);
+  });
+}
+
+function getCurrentTime() {
+  return new Date().toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: TIMEZONE
+  });
+}
+
+function getNextPrayer(prayerName) {
+  const idx = prayerOrder.indexOf(prayerName);
+  return prayerOrder[idx + 1];
+}
+
+/* =========================
+   CEK WAKTU SHOLAT
+========================= */
+function checkPrayerTime(client, sentFlags) {
+  const now = getCurrentTime();
+
+  for (const [name, time] of Object.entries(prayerTimes)) {
+    if (now === time && !sentFlags[name]) {
+
+      sendToAllGroups(
+        client,
+        `⏰ Kak sama Buk, waktunya sholat ${name.toUpperCase()}. Jangan lupa foto ke grup.`
+      );
+
       sentFlags[name] = true;
 
       if (photoRequiredTimes.includes(name)) {
         startPhotoWatch(client, name);
       }
-    } else if (currentTime !== time && sentFlags[name]) {
-      sentFlags[name] = false;
     }
-  });
+  }
 }
 
-
-// Mulai pantau apakah "Buk" dan "Kak" mengirim foto
+/* =========================
+   PANTAU FOTO
+========================= */
 function startPhotoWatch(client, prayerName) {
+
   photoCheckStatus[prayerName] = {
     Buk: false,
-    Kak: false,
-    timer: setTimeout(() => {
-      const status = photoCheckStatus[prayerName];
-      const notSent = [];
-
-      if (!status.Buk) notSent.push('Buk');
-      if (!status.Kak) notSent.push('Kak');
-
-      if (notSent.length > 0) {
-        const message = `❗ Pengingat: ${notSent.join(' dan ')} belum mengirim foto untuk sholat ${prayerName}.`;
-        sendToAllGroups(client, message);
-      }
-
-      delete photoCheckStatus[prayerName];
-    }, 30 * 60 * 1000) // 30 menit
+    Kak: false
   };
 
-  console.log(`⏳ Memantau foto dari Buk dan Kak untuk sholat ${prayerName}...`);
+  console.log(`⏳ Pantau foto sholat ${prayerName}`);
+
+  // 30 menit → reminder grup
+  setTimeout(() => {
+    const status = photoCheckStatus[prayerName];
+    if (!status) return;
+
+    const missing = Object.keys(status).filter(k => !status[k]);
+
+    if (missing.length) {
+      sendToAllGroups(
+        client,
+        `❗ ${missing.join(' dan ')} belum kirim foto sholat ${prayerName}`
+      );
+    }
+  }, 30 * 60 * 1000);
+
+  // 10 menit sebelum sholat berikutnya → DM
+  const nextPrayer = getNextPrayer(prayerName);
+  if (!nextPrayer) return;
+
+  const [h, m] = prayerTimes[nextPrayer].split(':').map(Number);
+  const notifyTime = new Date();
+  notifyTime.setHours(h, m - 10, 0);
+
+  const delay = notifyTime - new Date();
+
+  if (delay > 0) {
+    setTimeout(() => {
+      const status = photoCheckStatus[prayerName];
+      if (!status) return;
+
+      Object.entries(watchUsers).forEach(([jid, name]) => {
+        if (!status[name]) {
+          sendMessageWithSeen(
+            client,
+            jid,
+            `${name}, apakah sudah sholat ${prayerName}?`
+          );
+        }
+      });
+
+      delete photoCheckStatus[prayerName];
+
+    }, delay);
+  }
 }
 
-// Tangani pesan masuk dan cek apakah itu foto dari Buk/Kak
-function handleIncomingMessage(msg) {
+/* =========================
+   HANDLE PESAN MASUK
+========================= */
+async function handleIncomingMessage(msg) {
+
+  try {
+    const chat = await msg.getChat();
+    await chat.sendSeen(); // otomatis seen saat ada pesan masuk
+  } catch (err) {
+    console.log('Seen gagal:', err);
+  }
+
   if (!msg.hasMedia) return;
-  if (!msg.from || !watchUsers[msg.from]) return;
-  if (!msg.to.endsWith('@g.us')) return; // harus ke grup
+  if (!watchUsers[msg.from]) return;
+  if (!msg.to.endsWith('@g.us')) return;
 
-  // Cek apakah sedang ada pemantauan foto
-  Object.keys(photoCheckStatus).forEach(prayerName => {
-    const status = photoCheckStatus[prayerName];
-    const senderName = watchUsers[msg.from];
+  const sender = watchUsers[msg.from];
 
-    if (!status[senderName]) {
-      status[senderName] = true;
-      console.log(`📷 ${senderName} sudah kirim foto untuk sholat ${prayerName}`);
+  Object.values(photoCheckStatus).forEach(status => {
+    if (!status[sender]) {
+      status[sender] = true;
+      console.log(`📷 ${sender} sudah kirim foto`);
     }
   });
 }
 
-// Jadwal sholat (manual)
-const prayerTimes = {
-  subuh: '05:30',
-  dzuhur: '12:22',
-  ashar: '15:33',
-  maghrib: '18:09',
-  isya: '19:02'
-};
+/* =========================
+   START
+========================= */
+async function startSchedule(client) {
 
-function startSchedule(client) {
-  const sentFlags = {
-    subuh: false,
-    dzuhur: false,
-    ashar: false,
-    maghrib: false,
-    isya: false
-  };
+  await fetchPrayerTimes();
+
+  const sentFlags = {};
+  Object.keys(prayerTimes).forEach(k => (sentFlags[k] = false));
 
   setInterval(() => {
-    if (client && client.info && client.info.wid) {
-      checkPrayerTime(client, sentFlags);
-    }
+    checkPrayerTime(client, sentFlags);
   }, 60 * 1000);
 
-  // Tangkap pesan masuk untuk cek media dari Buk/Kak
   client.on('message', handleIncomingMessage);
 
-  console.log('🕋 Jadwal pengingat sholat & pemantauan foto aktif (khusus ke grup)');
+  console.log('✅ Reminder sholat + foto + DM + sendSeen aktif');
 }
 
 module.exports = { startSchedule };
