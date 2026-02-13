@@ -61,24 +61,24 @@ services:
   #   restart: always
 
   app:
-    build:
-      context: ./App
-    container_name: app
-    restart: always
-    expose:
-      - "9876"
-    environment:
-      - PORT=9876
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.app.rule=Host(`ashanum.com`)"
-      - "traefik.http.routers.app.entrypoints=websecure"
-      - "traefik.http.routers.app.tls.certresolver=myresolver"
-      - "traefik.http.services.app.loadbalancer.server.port=9876"
-    networks:
+  build:
+    context: ./App
+  container_name: app
+  restart: always
+  expose:
+    - "9876"
+  env_file:
+    - ./App/app/.env
+  labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.app.rule=Host(`ashanum.com`)"
+    - "traefik.http.routers.app.entrypoints=websecure"
+    - "traefik.http.routers.app.tls.certresolver=myresolver"
+    - "traefik.http.services.app.loadbalancer.server.port=9876"
+  networks:
     - proxy
+
 
 networks:
   proxy:
     external: true
-    
