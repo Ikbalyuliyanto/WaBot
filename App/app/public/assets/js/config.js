@@ -1,13 +1,14 @@
-
 // =========================
 // CONFIG
 // =========================
 (() => {
-  const protocol = window.location.protocol; // http / https
-  const host = window.location.hostname;     // localhost / IP / domain
-  const port = 9876;                         // Port Docker yang dipublish
+  const { protocol, hostname, port, origin } = window.location;
 
-  window.API_BASE = `${protocol}//${host}:${port}`;
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    window.API_BASE = `http://${hostname}:9876`;  // dev
+  } else {
+    window.API_BASE = `${origin}`;  // production, HTTPS via Traefik
+  }
 
   // =========================
   // STORAGE HELPERS
