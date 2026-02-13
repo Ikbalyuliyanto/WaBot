@@ -76,7 +76,9 @@ services:
       - "traefik.http.routers.app.tls.certresolver=myresolver"
       - "traefik.http.services.app.loadbalancer.server.port=9876"
     networks:
-    - proxy
+      - proxy
+    volumes:
+      - ./uploads:/app/uploads
 
 networks:
   proxy:
