@@ -59,7 +59,6 @@ services:
   #   ports:
   #     - "3005:3005"
   #   restart: always
-  
   app:
     build:
       context: ./App
@@ -77,26 +76,6 @@ services:
       - "traefik.http.services.app.loadbalancer.server.port=9876"
     networks:
       - proxy
-    depends_on:
-      - postgres_quilvian
-
-  postgres_quilvian:
-    image: postgres:15
-    container_name: postgres_quilvian
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 'Admin@1234'
-      POSTGRES_DB: postgres
-    ports:
-      - "5432:5432"
-    networks:
-      - proxy
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
-volumes:
-  pgdata:
 
 networks:
   proxy:
