@@ -43,6 +43,14 @@ const rootDir = path.join(__dirname, "..", "..");
 // ===== Middleware dasar
 app.use(cors());
 app.use(express.json());
+app.use((req, res, next) => {
+  const host = `${req.protocol}://${req.get("host")}`;
+  res.setHeader(
+    "Content-Security-Policy",
+    `default-src 'self'; img-src 'self' ${host} data:;`
+  );
+  next();
+});
 
 // ✅ Static public (folder FE public ada di app/public)
 app.use(express.static(path.join(__dirname, "..", "public")));
