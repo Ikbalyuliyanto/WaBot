@@ -1,8 +1,20 @@
-const protocol = location.protocol;  // http / https
-const host = location.hostname;      // localhost / IP / domain
-const port = 9876;                    // Port Docker yang dipublish
+(() => {
+  const { protocol, hostname, port, origin } = window.location;
 
-window.API_BASE = `${protocol}//${host}:${port}`;
+  // Kalau akses langsung ke port 9876 (dev / IP)
+  if (port === "9876") {
+    window.API_BASE = origin; 
+  }
+  // Kalau localhost tanpa port (misal pakai frontend terpisah)
+  else if (hostname === "localhost" || hostname === "127.0.0.1") {
+    window.API_BASE = `${protocol}//${hostname}:9876`;
+  }
+  // Production (domain via Traefik HTTPS)
+  else {
+    window.API_BASE = origin;
+  }
+})();
+
 
 window.apiRequest = async (endpoint, options = {}) => {
   const url = `${window.API_BASE}${endpoint}`;
