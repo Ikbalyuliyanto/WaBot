@@ -1,13 +1,8 @@
-(() => {
-  const { protocol, hostname, port, origin } = window.location;
+const protocol = location.protocol;  // http / https
+const host = location.hostname;      // localhost / IP / domain
+const port = 9876;                    // Port Docker yang dipublish
 
-  if (hostname === "localhost" || hostname === "127.0.0.1") {
-    window.API_BASE = `http://${hostname}:9876`;  // dev
-  } else {
-    window.API_BASE = `${origin}`;  // production, HTTPS via Traefik
-  }
-})();
-
+window.API_BASE = `${protocol}//${host}:${port}`;
 
 window.apiRequest = async (endpoint, options = {}) => {
   const url = `${window.API_BASE}${endpoint}`;

@@ -20,15 +20,15 @@ services:
   #     - "3001:3001"
   #   restart: always
 
-  webjs2:
-    build:
-      context: ./webjs2
-      args:
-        PORT: 3002
-    container_name: webjs2
-    ports:
-      - "3002:3002"
-    restart: always
+  # webjs2:
+  #   build:
+  #     context: ./webjs2
+  #     args:
+  #       PORT: 3002
+  #   container_name: webjs2
+  #   ports:
+  #     - "3002:3002"
+  #   restart: always
 
   # webjs3:
   #   build:
@@ -78,8 +78,7 @@ services:
     networks:
       - proxy
     volumes:
-      - /home/ecustomer/WaBot/App/uploads:/app/uploads
-
+      - ./App/uploads:/usr/src/app/uploads
 
 networks:
   proxy:
