@@ -124,11 +124,11 @@ router.post('/send-message', async (req, res) => {
 
     const chatId = number.includes('@c.us') ? number : `${number}@c.us`;
     try {
-        await client.sendMessage(chatId, message);
+        await client.sendMessage(chatId, message, {sendSeen: false});
         res.json({ message: '✅ Pesan berhasil dikirim' });
     } catch (error) {
         console.error('❌ Gagal kirim pesan:', error);
-        res.status(500).json({ message: 'Gagal mengirim pesan' });
+        res.status(500).json({ message: 'Gagal mengirim pesan', error: error.message });
     }
 });
 
