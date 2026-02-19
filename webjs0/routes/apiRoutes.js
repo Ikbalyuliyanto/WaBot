@@ -133,24 +133,52 @@ router.post('/send-message', async (req, res) => {
 });
 
 // API: Kirim file ke WhatsApp
-router.post('/upload-and-send', upload.single('pdf'), async (req, res) => {
+router.post('/upload-and-send', upload.array('pdf', 10), async (req, res) => {
     const { number } = req.body;
-    if (!number || !req.file) return res.status(400).json({ message: 'Nomor dan file wajib diisi.' });
+
+    if (!number || !req.files || req.files.length === 0) {
+        return res.status(400).json({ message: 'Nomor dan file wajib diisi.' });
+    }
 
     const chatId = number.includes('@c.us') ? number : `${number}@c.us`;
-    const filePath = path.resolve(req.file.path);
-    const mimeType = req.file.mimetype;
-    const base64Data = fs.readFileSync(filePath).toString('base64');
 
-    const media = new MessageMedia(mimeType, base64Data, req.file.originalname);
     try {
-        await client.sendMessage(chatId, media, { sendMediaAsDocument: true });
-        res.json({ message: '✅ File berhasil dikirim ke WhatsApp.' });
+        for (const file of req.files) {
+            const filePath = path.resolve(file.path);
+            const mimeType = file.mimetype;
+            const base64Data = fs.readFileSync(filePath).toString('base64');
+
+            const media = new MessageMedia(mimeType, base64Data, file.originalname);
+
+            await client.sendMessage(chatId, media, { sendMediaAsDocument: true });
+        }
+
+        res.json({ message: '✅ Semua file berhasil dikirim ke WhatsApp.' });
+
     } catch (error) {
         console.error('❌ Gagal kirim file:', error);
         res.status(500).json({ message: 'Gagal mengirim file' });
     }
 });
+
+// router.post('/upload-and-send', upload.single('pdf'), async (req, res) => {
+//     const { number } = req.body;
+//     if (!number || !req.file) return res.status(400).json({ message: 'Nomor dan file wajib diisi.' });
+
+//     const chatId = number.includes('@c.us') ? number : `${number}@c.us`;
+//     const filePath = path.resolve(req.file.path);
+//     const mimeType = req.file.mimetype;
+//     const base64Data = fs.readFileSync(filePath).toString('base64');
+
+//     const media = new MessageMedia(mimeType, base64Data, req.file.originalname);
+//     try {
+//         await client.sendMessage(chatId, media, { sendMediaAsDocument: true });
+//         res.json({ message: '✅ File berhasil dikirim ke WhatsApp.' });
+//     } catch (error) {
+//         console.error('❌ Gagal kirim file:', error);
+//         res.status(500).json({ message: 'Gagal mengirim file' });
+//     }
+// });
 
 // API: Kirim file via email
 router.post('/upload-and-send-mail', upload.single('pdf'), async (req, res) => {
