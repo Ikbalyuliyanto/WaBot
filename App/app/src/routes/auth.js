@@ -254,5 +254,4 @@ router.post("/google-login", async (req, res) => {
   }
 });
 
-
 export default router;
