@@ -50,15 +50,15 @@ services:
   #     - "3030:3030"
   #   restart: always
     
-  webjs5:
-    build:
-      context: ./webjs5
-      args:
-        PORT: 3005
-    container_name: webjs5
-    ports:
-      - "3005:3005"
-    restart: always
+  # webjs5:
+  #   build:
+  #     context: ./webjs5
+  #     args:
+  #       PORT: 3005
+  #   container_name: webjs5
+  #   ports:
+  #     - "3005:3005"
+  #   restart: always
 
   app:
     build:
@@ -83,3 +83,4 @@ services:
 networks:
   proxy:
     external: true
+        
