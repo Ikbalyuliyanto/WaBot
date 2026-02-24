@@ -5,10 +5,9 @@
 (() => {
 
 // ─── API Base URL ──────────────────────────────────────────────────────────────
-const API_BASE =
-  window.location.hostname === "ashanum.com"
-    ? "https://ashanum.com"
-    : `http://${window.location.hostname}:9876`;
+const API_BASE = window.location.hostname === "localhost"
+  ? "http://localhost:9876"
+  : "https://ashanum.com";
 
 window.API_BASE = API_BASE;
 
@@ -17,6 +16,9 @@ window.API_BASE = API_BASE;
   try {
     const res    = await fetch(`${API_BASE}/api/config`);
     const config = await res.json();
+
+    // Google OAuth
+    window.GOOGLE_CLIENT_ID = config.googleClientId;
 
     // Midtrans Snap SDK
     const script = document.createElement("script");
