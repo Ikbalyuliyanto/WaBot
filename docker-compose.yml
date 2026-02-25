@@ -59,7 +59,6 @@ services:
   #   ports:
   #     - "3005:3005"
   #   restart: always
-
   app:
     build:
       context: ./App
@@ -71,10 +70,25 @@ services:
       - PORT=9876
     labels:
       - "traefik.enable=true"
+
+      # ===== Router utama (semua traffic) =====
       - "traefik.http.routers.app.rule=Host(`ashanum.com`)"
       - "traefik.http.routers.app.entrypoints=websecure"
       - "traefik.http.routers.app.tls.certresolver=myresolver"
       - "traefik.http.services.app.loadbalancer.server.port=9876"
+
+      # ===== Router khusus /xadmin (dengan basicAuth) =====
+      - "traefik.http.routers.app-admin.rule=Host(`ashanum.com`) && PathPrefix(`/xadmin`)"
+      - "traefik.http.routers.app-admin.entrypoints=websecure"
+      - "traefik.http.routers.app-admin.tls.certresolver=myresolver"
+      - "traefik.http.routers.app-admin.middlewares=admin-auth"
+      - "traefik.http.routers.app-admin.priority=10"
+
+      # ===== Middleware basicAuth =====
+      # Format: username:hashed_password
+      # Ganti dengan hasil generate dari: htpasswd -nb admin passwordkamu
+      - "traefik.http.middlewares.admin-auth.basicauth.users=admin:$$apr1$$.gwe9KQ1$$l/ph12n3A9olt4iS/JAas0"
+
     networks:
       - proxy
     volumes:
@@ -83,4 +97,27 @@ services:
 networks:
   proxy:
     external: true
+#   app:
+#     build:
+#       context: ./App
+#     container_name: app
+#     restart: always
+#     expose:
+#       - "9876"
+#     environment:
+#       - PORT=9876
+#     labels:
+#       - "traefik.enable=true"
+#       - "traefik.http.routers.app.rule=Host(`ashanum.com`)"
+#       - "traefik.http.routers.app.entrypoints=websecure"
+#       - "traefik.http.routers.app.tls.certresolver=myresolver"
+#       - "traefik.http.services.app.loadbalancer.server.port=9876"
+#     networks:
+#       - proxy
+#     volumes:
+#       - ./App/uploads:/usr/src/app/uploads
+
+# networks:
+#   proxy:
+#     external: true
         
