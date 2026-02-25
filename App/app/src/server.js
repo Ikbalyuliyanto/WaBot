@@ -51,20 +51,6 @@ const devUploads = path.join(rootDir, "uploads");      // lokal/dev
 const prodUploads = path.join(process.cwd(), "uploads"); // Docker/prod
 // ===== Middleware dasar
 app.use(cors());
-app.use((req, res, next) => {
-  res.setHeader(
-    "Content-Security-Policy",
-    "script-src 'self' 'unsafe-eval' " +
-    "https://app.midtrans.com " +
-    "https://snap-assets.al-pc-id-p.cdn.gtflabs.io " +
-    "https://api.midtrans.com " +
-    "https://pay.google.com " +
-    "https://js-agent.newrelic.com " +
-    "https://bam.nr-data.net " +
-    "https://gwk.gopayapi.com"
-  );
-  next();
-});
 app.use(express.json());
 
 // app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
