@@ -82,8 +82,8 @@ services:
       - "traefik.http.routers.app-admin.entrypoints=websecure"
       - "traefik.http.routers.app-admin.tls.certresolver=myresolver"
       - "traefik.http.routers.app-admin.middlewares=admin-auth"
+      - "traefik.http.routers.app.priority=1"
       - "traefik.http.routers.app-admin.priority=10"
-
       # ===== Middleware basicAuth =====
       # Format: username:hashed_password
       # Ganti dengan hasil generate dari: htpasswd -nb admin passwordkamu
