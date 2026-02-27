@@ -70,7 +70,6 @@ services:
       - PORT=9876
     labels:
       - "traefik.enable=true"
-
       # ===== Router utama (semua traffic) =====
       - "traefik.http.routers.app.rule=Host(`ashanum.com`)"
       - "traefik.http.routers.app.entrypoints=websecure"
