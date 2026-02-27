@@ -25,15 +25,13 @@ window.API_BASE = API_BASE;
     script.async  = true;
     // SESUDAH
     script.onload = () => {
-      console.log("✅ Midtrans Snap SDK loaded, window.snap:", !!window.snap);
+      // console.log("✅ Midtrans Snap SDK loaded, window.snap:", !!window.snap);
       window.dispatchEvent(new Event("snapReady")); // ← wajib ada
     };
     script.onerror = () => {
       console.error("❌ Gagal memuat SDK — URL:", script.src, "| Key:", config.midtransClientKey);
     };
     // Debug — pastikan ini muncul di console
-    console.log("🔗 Snap URL:", config.midtransSnapUrl);
-    console.log("🔑 Client Key:", config.midtransClientKey);
     document.head.appendChild(script);
 
   } catch (err) {
