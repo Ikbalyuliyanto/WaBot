@@ -66,6 +66,8 @@ services:
     restart: always
     expose:
       - "9876"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - PORT=9876
     labels:
