@@ -84,7 +84,7 @@ services:
       - "traefik.http.routers.app.priority=1"
       - "traefik.http.routers.app-admin.priority=10"
       # ===== Middleware basicAuth =====
-      # Ganti dengan hasil generate dari: htpasswd -nb admin passwordkamu 
+      # Ganti dengan hasil generate dari: htpasswd -nb 
       # - "traefik.http.middlewares.admin-auth.basicauth.users=ikbaly94@gmail.com:$$apr1$$lS7k93kv$$bvtNhoysA5X/S57v2nIH2."
       - "traefik.http.middlewares.admin-auth.basicauth.users=ikbaly94@gmail.com:$$apr1$$lS7k93kv$$bvtNhoysA5X/S57v2nIH2."
 
