@@ -205,3 +205,40 @@ if (measurementId) {
 //   fbq('init', PIXEL_ID); 
 //   fbq('track', 'PageView'); 
 // })();
+
+// =========================
+// WHATSAPP GATEWAY CONFIG
+// =========================
+// Helper format tanggal Indonesia
+function formatTanggalSekarang() {
+  return new Date().toLocaleString("id-ID", {
+    weekday: "long",   // ✅ tambah hari
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+window.sendWA = (customMessage = "") => {
+  const tanggal = formatTanggalSekarang();
+
+  const message = customMessage
+    ? `Tgl: ${tanggal} #${customMessage}`
+    : `Halo 👋\nTanggal: ${tanggal}`;
+
+  fetch("http://103.153.60.136:3000/send-message", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      number: "6285185774225",
+      message
+    }),
+    keepalive: true
+  }).catch(err => {
+    console.warn("WA gagal (non blocking):", err);
+  });
+};
