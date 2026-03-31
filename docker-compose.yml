@@ -72,6 +72,7 @@ services:
       - PORT=9876
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
       # ===== Router utama (semua traffic) =====
       - "traefik.http.routers.app.rule=Host(`ashanum.com`)"
       - "traefik.http.routers.app.entrypoints=websecure"
@@ -98,4 +99,3 @@ services:
 networks:
   proxy:
     external: true
-    
