@@ -76,13 +76,15 @@ services:
       # ===== Router utama (semua traffic) =====
       - "traefik.http.routers.app.rule=Host(`ashanum.com`)"
       - "traefik.http.routers.app.entrypoints=websecure"
-      - "traefik.http.routers.app.tls.certresolver=myresolver"
+      # - "traefik.http.routers.app.tls.certresolver=myresolver"
+      - "traefik.http.routers.app.tls.certresolver=letsencrypt"
       - "traefik.http.services.app.loadbalancer.server.port=9876"
 
       # ===== Router khusus /xadmin (dengan basicAuth) =====
       - "traefik.http.routers.app-admin.rule=Host(`ashanum.com`) && PathPrefix(`/xadmin`)"
       - "traefik.http.routers.app-admin.entrypoints=websecure"
-      - "traefik.http.routers.app-admin.tls.certresolver=myresolver"
+      # - "traefik.http.routers.app-admin.tls.certresolver=myresolver"      
+      - "traefik.http.routers.app-admin.tls.certresolver=letsencrypt"
       - "traefik.http.routers.app-admin.middlewares=admin-auth"
       - "traefik.http.routers.app.priority=1"
       - "traefik.http.routers.app-admin.priority=10"
