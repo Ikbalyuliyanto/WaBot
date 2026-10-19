@@ -30,7 +30,7 @@ test('jadwal: soal pertama di window, sapaan + soal EN/ID', () => {
   const s = createState();
   assert.deepEqual(b.tick(s, wib(MON, '05:59')), [], 'di luar window');
   const [msg] = b.tick(s, wib(MON, '06:00'));
-  assert.match(msg, /^🌅 Ikbal, wake up\. Good morning\./);
+  assert.match(msg, /^🌅 Ikbal, *(Let's eat|Have a good day|Be careful).* _(/);
   const q = bank.byId(s.active.qid);
   assert.ok(msg.includes(`*${q.en}*`) && msg.includes(`_${q.idn}_`));
   assert.ok(['wake', 'breakfast', 'prepare'].includes(q.context));
@@ -66,7 +66,7 @@ test('jawaban salah -> kisi-kisi bertahap, soal tetap; benar -> pujian + arti, s
   assert.match(r, /⚠️ \*Hampir benar\*/); assert.match(r, /Lebih tepat: \*I ate rice\.\*/); assert.match(r, /🇮🇩 Saya makan nasi\./);
   assert.ok(s.active, 'almost -> soal tetap');
   r = b.onMessage(s, 'I ate rice and chicken.', wib(MON, '12:06'));
-  assert.match(r, /✅ \*Benar\*/); assert.match(r, /🇮🇩 Saya makan nasi dan ayam\./); assert.match(r, /(Good job, Ikbal!|Nice work, Ikbal!|That's correct!|Great job!)/);
+  assert.match(r, /✅ \*Benar\*/); assert.match(r, /🇮🇩 Saya makan nasi dan ayam\./); assert.match(r, /\*(See you later\.|That sounds good\.)\*/);
   assert.equal(s.active, null);
 });
 
@@ -88,7 +88,7 @@ test('weekend: window & sapaan sendiri; review mode Day 1-20', () => {
   const s = createState();
   assert.deepEqual(b.tick(s, wib('2026-10-24', '07:30')), []);
   const [msg] = b.tick(s, wib('2026-10-24', '08:00'));
-  assert.match(msg, /Happy weekend/);
+  assert.match(msg, /^☀️ Ikbal, \*(Let's eat\.|Have a nice day\.)\*/);
   for (let i = 0; i < 200; i++) {
     const st = createState();
     b.onMessage(st, 'soal', wib(MON, '20:00'));
@@ -108,6 +108,18 @@ test('perintah: bantuan, jeda/mulai, lewati, status; pesan tanpa soal aktif', ()
   assert.match(b.onMessage(s, 'status', wib(MON, '12:01')), /Soal aktif/);
   assert.match(b.onMessage(s, 'lewati', wib(MON, '12:02')), /dilewati/);
   assert.equal(s.active, null);
+});
+
+test('kalimat pembuka/penutup hanya dari materi yang sudah dipelajari', () => {
+  const b2 = createBrain({ bank, name: 'Ikbal', getCurrentDay: () => 3, random: () => 0.99 });
+  const s = createState();
+  const [msg] = b2.tick(s, wib(MON, '06:00'));
+  assert.match(msg, /\*Let's eat\.\* _\(Ayo makan\.\)_/, 'Day 3: hanya kalimat Day <= 3');
+  const b1 = createBrain({ bank, name: 'Ikbal', getCurrentDay: () => 1, random: () => 0.5 });
+  const s1 = createState();
+  const [m1] = b1.tick(s1, wib(MON, '06:00'));
+  assert.match(m1, /^🌅 Ikbal 👋/, 'Day 1: belum ada kalimat pembuka yang dipelajari');
+  b1.onMessage(s1, 'lewati', wib(MON, '06:01'));
 });
 
 test('reset harian per tanggal WIB', () => {

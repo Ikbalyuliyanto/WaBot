@@ -26,6 +26,25 @@ const WEEKEND = [
   { id: 'weekendEvening', start: '17:00', end: '21:00', limit: 4, contexts: ['weekend', 'evening', 'bedtime'], greeting: '🌙 {name}, good evening.' }
 ];
 const DAILY_LIMIT = { weekday: 10, weekend: 12 };
+
+// Kalimat pembuka/penutup HANYA dari materi app (Day 1-20), dipakai bila minDay <= batas Day user.
+// (sumber: data/days/day-XX.js; "Good morning/evening/job" tidak ada di materi sehingga tidak dipakai)
+const OPENERS = {
+  morning: [["Let's eat.", 'Ayo makan.', 3], ['Have a good day.', 'Semoga harimu menyenangkan.', 6], ['Be careful.', 'Hati-hati.', 4]],
+  commuteMorning: [["Let's go.", 'Ayo berangkat.', 6], ["Let's go by train.", 'Ayo pergi naik kereta.', 6], ['Have a nice day.', 'Semoga harimu menyenangkan.', 15], ['Be careful.', 'Hati-hati.', 4]],
+  lunch: [["Let's eat.", 'Ayo makan.', 3]],
+  commuteHome: [['Take care.', 'Jaga diri.', 11], ['Be careful.', 'Hati-hati.', 4], ["Let's go.", 'Ayo berangkat.', 6]],
+  evening: [["Let's eat.", 'Ayo makan.', 3], ['That sounds good.', 'Kedengarannya bagus.', 15]],
+  weekendMorning: [["Let's eat.", 'Ayo makan.', 3], ['Have a nice day.', 'Semoga harimu menyenangkan.', 15]],
+  weekendMidday: [["Let's eat.", 'Ayo makan.', 3], ["Let's go outside.", 'Ayo keluar.', 10]],
+  weekendAfternoon: [["Let's go outside.", 'Ayo keluar.', 10], ["Let's hang out.", 'Ayo jalan bareng.', 15]],
+  weekendEvening: [["Let's eat.", 'Ayo makan.', 3], ['That sounds good.', 'Kedengarannya bagus.', 15]]
+};
+// Penutup setelah jawaban benar (sesuai waktu) dan tanggapan pendek.
+const CLOSERS = {
+  night: [['Good night.', 'Selamat malam.', 15], ['See you soon.', 'Sampai jumpa lagi.', 15]],
+  day: [['See you later.', 'Sampai jumpa nanti.', 5], ['That sounds good.', 'Kedengarannya bagus.', 15]]
+};
 const MAX_REMINDERS_PER_WINDOW = 3;
 
 const toMin = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
@@ -66,8 +85,15 @@ function createBrain({ bank, name = '', interval = 15, cooldown = 10, reviewMaxD
     return pool.reduce((best, q) => (score(q) > score(best) ? q : best), pool[0]);
   }
 
+  const learned = (list) => (list || []).filter(([, , d]) => d <= dayLimit());
+  const one = (list) => (list.length ? list[Math.floor(random() * list.length)] : null);
+  function opener(w) {
+    const emoji = w ? w.greeting.split(' ')[0] : '📘';
+    const line = one(learned(w && OPENERS[w.id]));
+    return line ? `${emoji} ${name ? name + ', ' : ''}*${line[0]}* _(${line[1]})_` : `${emoji} ${name || 'Hi'} 👋`;
+  }
   const questionText = (q, w, reminder) => [
-    reminder ? `⏰ *Pengingat* — soal ini belum dijawab.` : nm(w ? w.greeting : '📘 {name}, English time.'),
+    reminder ? `⏰ *Pengingat* — soal ini belum dijawab.` : opener(w),
     '',
     `*${q.en}*`,
     `_${q.idn}_`,
@@ -112,7 +138,11 @@ function createBrain({ bank, name = '', interval = 15, cooldown = 10, reviewMaxD
   }
 
   const VERDICT = { correct: '✅ *Benar*', almost: '⚠️ *Hampir benar*', wrong: '❌ *Perlu diperbaiki*' };
-  const PRAISE = ['Good job, {name}!', 'Nice work, {name}!', "That's correct!", 'Great job!'];
+  function closer(ms) {
+    const night = wib(ms).minutes >= toMin('19:00');
+    const line = one(learned(CLOSERS[night ? 'night' : 'day']));
+    return line ? `*${line[0]}* _(${line[1]})_` : '';
+  }
   const HELP = [
     '🤖 *English Companion*',
     'Balas soal dengan jawaban English kamu.',
@@ -151,7 +181,8 @@ function createBrain({ bank, name = '', interval = 15, cooldown = 10, reviewMaxD
     }
     // correct
     if (m.meaningIdn) lines.push(m.meaningSource === 'sample' ? `Contoh yang benar: *${m.meaningEn}*\n🇮🇩 ${m.meaningIdn}` : `🇮🇩 ${m.meaningIdn}`);
-    lines.push('', nm(PRAISE[Math.floor(random() * PRAISE.length)]), `Soal berikutnya datang paling cepat ${cooldown} menit lagi.`);
+    const bye = closer(ms);
+    lines.push('', ...(bye ? [bye] : []), `Soal berikutnya datang paling cepat ${cooldown} menit lagi.`);
     state.active = null;
     state.lastCorrectAt = ms;
     return lines.join('\n');
