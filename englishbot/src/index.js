@@ -85,15 +85,27 @@ function createClient(webVersion) {
 }
 const ownerChatId = `${CFG.owner}@c.us`;
 
+// WhatsApp baru bisa mengirim id pengirim berformat "@lid" (bukan nomor). Cocokkan ke nomor HP lalu ingat.
+const ownerIds = new Set([ownerChatId]);
+const mask = (id) => String(id).replace(/\d(?=\d{4})/g, '•');
 async function isOwner(msg) {
-  if (msg.fromMe || msg.isStatus) return false;
-  if (msg.from === ownerChatId) return true;
-  try { return (await msg.getContact())?.number === CFG.owner; } catch { return false; }
+  if (msg.fromMe || msg.isStatus || msg.from.endsWith('@g.us')) return false;
+  if (ownerIds.has(msg.from)) return true;
+  try {
+    if (msg.from.endsWith('@lid')) {
+      const [r] = await client.getContactLidAndPhone([msg.from]);
+      if (r?.pn === ownerChatId) { ownerIds.add(msg.from); return true; }
+    }
+    const c = await msg.getContact();
+    if (c?.number === CFG.owner || c?.id?.user === CFG.owner) { ownerIds.add(msg.from); return true; }
+  } catch (err) { console.warn('[owner] gagal cek pengirim:', err.message); }
+  console.log('[owner] pesan diabaikan dari', mask(msg.from), '(bukan OWNER_NUMBER)');
+  return false;
 }
 
-async function send(text) {
+async function send(text, chatId = ownerChatId) {
   if (!status.ready) return false;
-  try { await client.sendMessage(ownerChatId, text); return true; } catch (err) { console.warn('[send] gagal:', err.message); return false; }
+  try { await client.sendMessage(chatId, text); return true; } catch (err) { console.warn('[send] gagal:', err.message); return false; }
 }
 
 function registerEvents() {
@@ -126,13 +138,13 @@ async function startWhatsApp(attempt = 1) {
 
 let brain = null;
 async function onIncoming(msg) {
-  if (!brain || msg.type !== 'chat' || !(await isOwner(msg))) {
-    if (brain && msg.type === 'ptt' && (await isOwner(msg))) await send('🎙️ Pesan suara belum didukung. Ketik jawabanmu ya.');
-    return;
-  }
+  if (!brain || !['chat', 'ptt'].includes(msg.type) || !(await isOwner(msg))) return;
+  console.log('[msg] dari pemilik:', msg.type);
+  // Balas ke chat yang sama (bisa @lid atau @c.us).
+  if (msg.type === 'ptt') { await send('🎙️ Pesan suara belum didukung. Ketik jawabanmu ya.', msg.from); return; }
   const reply = brain.onMessage(state, msg.body, Date.now());
   saveState();
-  if (reply) await send(reply);
+  if (reply) await send(reply, msg.from);
 }
 
 // ---------- Web (QR & health) ----------
