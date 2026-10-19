@@ -1,0 +1,12 @@
+# Jalankan dari folder englishbot:  cp .env.example .env  (isi)  lalu  docker compose up -d --build
+services:
+  englishbot:
+    build: .
+    container_name: englishbot
+    env_file: .env
+    ports:
+      - "${PORT:-3100}:${PORT:-3100}"
+    volumes:
+      - ./data:/app/data        # sesi WhatsApp + state + cache bank (jangan dihapus agar tidak scan QR ulang)
+    shm_size: "512mb"           # Chromium butuh /dev/shm yang cukup
+    restart: unless-stopped
