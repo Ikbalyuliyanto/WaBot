@@ -30,7 +30,7 @@ test('jadwal: soal pertama di window, sapaan + soal EN/ID', () => {
   const s = createState();
   assert.deepEqual(b.tick(s, wib(MON, '05:59')), [], 'di luar window');
   const [msg] = b.tick(s, wib(MON, '06:00'));
-  assert.match(msg, /^🌅 Ikbal, *(Let's eat|Have a good day|Be careful).* _(/);
+  assert.match(msg, /^🌅 Ikbal, \*(Let's eat|Have a good day|Be careful)\.\* _\(/);
   const q = bank.byId(s.active.qid);
   assert.ok(msg.includes(`*${q.en}*`) && msg.includes(`_${q.idn}_`));
   assert.ok(['wake', 'breakfast', 'prepare'].includes(q.context));
