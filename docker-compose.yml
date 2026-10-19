@@ -98,7 +98,36 @@ services:
     volumes:
       - ./App/uploads:/usr/src/app/uploads
 
+  # Bot WhatsApp English Companion (lihat englishbot/README.md).
+  # Isi di .env server (folder WaBot): EB_OWNER_NUMBER, EB_ADMIN_TOKEN, opsional EB_OWNER_NAME.
+  # Login: http://SERVER:3100/qr?token=EB_ADMIN_TOKEN (sekali; sesi disimpan di volume englishbot_data).
+  englishbot:
+    build:
+      context: ./englishbot
+    container_name: englishbot
+    restart: unless-stopped
+    environment:
+      - OWNER_NUMBER=${EB_OWNER_NUMBER:-}
+      - OWNER_NAME=${EB_OWNER_NAME:-Ikbal}
+      - ADMIN_TOKEN=${EB_ADMIN_TOKEN:-}
+      - PORT=3100
+      - APP_BASE_URL=https://ikbalyuliyanto.github.io/english-90-hari/
+      - WORKER_BASE_URL=https://english-90-hari-push.ikbaly94.workers.dev
+      - REVIEW_MAX_DAY=${EB_REVIEW_MAX_DAY:-20}
+      - REMINDER_INTERVAL_MIN=15
+      - COOLDOWN_MIN=10
+      - WA_WEB_VERSION=${EB_WA_WEB_VERSION:-}
+      - TZ=Asia/Jakarta
+    ports:
+      - "3100:3100"
+    volumes:
+      - englishbot_data:/app/data
+    shm_size: "512mb"
+
 networks:
   proxy:
     external: true
+
+volumes:
+  englishbot_data:
     
