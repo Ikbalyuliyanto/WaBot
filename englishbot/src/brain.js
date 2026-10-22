@@ -182,7 +182,7 @@ function createBrain({ bank, name = '', interval = 15, cooldown = 10, reviewMaxD
     // correct
     if (m.meaningIdn) lines.push(m.meaningSource === 'sample' ? `Contoh yang benar: *${m.meaningEn}*\n🇮🇩 ${m.meaningIdn}` : `🇮🇩 ${m.meaningIdn}`);
     const bye = closer(ms);
-    lines.push('', ...(bye ? [bye] : []), `Soal berikutnya datang paling cepat ${cooldown} menit lagi.`);
+    lines.push('', ...(bye ? [bye] : []), 'Ketik *soal* untuk lanjut sekarang 💪');
     state.active = null;
     state.lastCorrectAt = ms;
     return lines.join('\n');
@@ -213,7 +213,12 @@ function createBrain({ bank, name = '', interval = 15, cooldown = 10, reviewMaxD
       const q = pick(state, w ? w.contexts : bank.contexts.map((c) => c.id));
       return q ? startQuestion(state, q, w, ms) : 'Belum ada soal untuk materi saat ini.';
     }
-    if (!state.active) return 'Belum ada soal aktif 🙂 Ketik *soal* untuk mulai, atau *bantuan* untuk menu.';
+    // Tidak ada soal aktif: pesan apa pun dibalas soal baru (lebih banyak latihan).
+    if (!state.active) {
+      const w = windowAt(ms);
+      const q = pick(state, w ? w.contexts : bank.contexts.map((c) => c.id));
+      return q ? startQuestion(state, q, w, ms) : 'Belum ada soal untuk materi saat ini.';
+    }
     return answer(state, t, ms);
   }
 

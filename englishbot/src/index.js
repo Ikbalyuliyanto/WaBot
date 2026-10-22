@@ -83,7 +83,7 @@ function createClient(webVersion) {
   }
   });
 }
-const ownerChatId = `${CFG.owner}@c.us`;
+let ownerChatId = `${CFG.owner}@c.us`;
 
 // WhatsApp baru bisa mengirim id pengirim berformat "@lid" (bukan nomor). Cocokkan ke nomor HP lalu ingat.
 const ownerIds = new Set([ownerChatId]);
@@ -103,14 +103,24 @@ async function isOwner(msg) {
   return false;
 }
 
-async function send(text, chatId = ownerChatId) {
-  if (!status.ready) return false;
-  try { await client.sendMessage(chatId, text); return true; } catch (err) { console.warn('[send] gagal:', err.message); return false; }
+async function send(text, chatId = state.chatId || ownerChatId) {
+  if (!status.ready) { console.warn('[send] WA belum siap, pesan dilewati'); return false; }
+  for (const id of [...new Set([chatId, ownerChatId])]) {
+    try { await client.sendMessage(id, text); return true; } catch (err) { console.warn('[send] gagal ke', mask(id) + ':', err.message); }
+  }
+  status.lastError = 'send failed';
+  return false;
 }
 
 function registerEvents() {
 client.on('qr', (qr) => { status.qr = qr; status.ready = false; console.log('[wa] QR baru — buka /qr?token=... untuk scan'); });
-client.on('ready', () => { status.ready = true; status.qr = null; console.log('[wa] siap'); });
+client.on('ready', async () => {
+  status.ready = true; status.qr = null;
+  // Chat id resmi nomor pemilik (WA baru bisa memakai @lid); kalau pemilik pernah chat, pakai chat itu.
+  try { const id = await client.getNumberId(CFG.owner); if (id?._serialized) { ownerChatId = id._serialized; ownerIds.add(ownerChatId); } } catch (e) { console.warn('[wa] getNumberId gagal:', e.message); }
+  if (state.chatId) ownerIds.add(state.chatId);
+  console.log('[wa] siap, kirim ke', mask(state.chatId || ownerChatId));
+});
 client.on('auth_failure', (m) => { status.lastError = 'auth_failure: ' + m; console.error('[wa]', status.lastError); });
 client.on('disconnected', (reason) => {
   status.ready = false;
@@ -140,6 +150,7 @@ let brain = null;
 async function onIncoming(msg) {
   if (!brain || !['chat', 'ptt'].includes(msg.type) || !(await isOwner(msg))) return;
   console.log('[msg] dari pemilik:', msg.type);
+  if (state.chatId !== msg.from) { state.chatId = msg.from; saveState(); }
   // Balas ke chat yang sama (bisa @lid atau @c.us).
   if (msg.type === 'ptt') { await send('🎙️ Pesan suara belum didukung. Ketik jawabanmu ya.', msg.from); return; }
   const reply = brain.onMessage(state, msg.body, Date.now());

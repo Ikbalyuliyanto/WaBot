@@ -99,7 +99,7 @@ test('weekend: window & sapaan sendiri; review mode Day 1-20', () => {
 test('perintah: bantuan, jeda/mulai, lewati, status; pesan tanpa soal aktif', () => {
   const b = brainOf();
   const s = createState();
-  assert.match(b.onMessage(s, 'halo', wib(MON, '10:00')), /Belum ada soal aktif/);
+  assert.match(b.onMessage(s, 'halo', wib(MON, '10:00')), /\?/);
   assert.match(b.onMessage(s, 'bantuan', wib(MON, '10:00')), /\*soal\*/);
   b.onMessage(s, 'jeda', wib(MON, '10:00'));
   assert.deepEqual(b.tick(s, wib(MON, '12:00')), [], 'dijeda');
