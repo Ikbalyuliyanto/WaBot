@@ -176,6 +176,11 @@ async function onIncoming(msg) {
 const app = express();
 const auth = (req, res, next) => (req.query.token === CFG.token ? next() : res.status(401).send('Unauthorized'));
 app.get('/health', (req, res) => res.json({ ok: true, ready: status.ready, bank: status.bank, webVersion: status.webVersion, lastError: status.lastError, currentDay, day: brain?.dayLimit() ?? null }));
+// Tes kirim ke pemilik: /send-test?token=...
+app.get('/send-test', auth, async (req, res) => {
+  const ok = await send('✅ Tes dari English bot: WhatsApp tersambung. Ketik *soal* untuk mulai latihan.');
+  res.json({ ok, ready: status.ready, to: mask(state.chatId || ownerChatId), lastError: status.lastError });
+});
 app.get('/qr', auth, async (req, res) => {
   if (status.ready) return res.send('<h2>✅ WhatsApp sudah terhubung.</h2>');
   if (!status.qr) return res.send('<meta http-equiv="refresh" content="3"><p>Menunggu QR…</p>');
