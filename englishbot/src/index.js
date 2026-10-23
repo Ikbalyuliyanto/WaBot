@@ -133,8 +133,21 @@ client.on('message', onIncoming);
 }
 
 // Inisialisasi dengan percobaan ulang (WhatsApp Web kadang reload halaman saat start).
+// Container baru (hostname baru) menemukan kunci profil Chromium dari container lama di volume
+// -> "profile appears to be in use". Hanya satu bot per volume, jadi kunci lama aman dihapus.
+function clearChromiumLocks(dir) {
+  let entries = [];
+  try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
+  for (const e of entries) {
+    const p = path.join(dir, e.name);
+    if (/^Singleton(Lock|Socket|Cookie)$/.test(e.name)) { try { fs.rmSync(p, { force: true }); console.log('[wa] hapus kunci lama:', e.name); } catch { /* abaikan */ } }
+    else if (e.isDirectory() && !e.isSymbolicLink()) clearChromiumLocks(p);
+  }
+}
+
 async function startWhatsApp(attempt = 1) {
   try { if (client) await client.destroy(); } catch { /* sudah mati */ }
+  clearChromiumLocks(path.join(CFG.dataDir, 'session'));
   client = createClient(status.webVersion);
   registerEvents();
   try {
