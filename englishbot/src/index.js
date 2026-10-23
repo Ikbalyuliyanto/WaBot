@@ -15,7 +15,8 @@ const { createBrain, createState } = require('./brain');
 (function main() {
 const env = (k, d) => (process.env[k] ?? '').trim() || d;
 const CFG = {
-  owner: env('OWNER_NUMBER', '').replace(/\D/g, ''),
+  // Format internasional tanpa "+": 0812... -> 62812... (WhatsApp butuh kode negara).
+  owner: env('OWNER_NUMBER', '').replace(/\D/g, '').replace(/^0/, '62'),
   name: env('OWNER_NAME', ''),
   token: env('ADMIN_TOKEN', ''),
   port: Number(env('PORT', '3100')),
